@@ -1,0 +1,17 @@
+package {{group}}
+
+import org.apache.logging.log4j.LogManager
+import {{group}}.adapter.MinecraftAdapter
+import {{group}}.util.ServiceLoaderUtil
+
+object {{name}} {
+    const val ID = "{{id}}"
+
+    val LOGGER = LogManager.getLogger()
+
+    init {
+        ServiceLoaderUtil.defaultLogger = LOGGER
+    }
+
+    fun id(path: String) = MinecraftAdapter.id(ID, path)
+}

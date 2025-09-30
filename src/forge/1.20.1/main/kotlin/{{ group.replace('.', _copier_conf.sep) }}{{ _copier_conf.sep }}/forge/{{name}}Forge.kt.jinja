@@ -1,0 +1,22 @@
+package {{group}}.forge
+
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
+import {{group}}.{{name}}
+import {{group}}.adapter.Entrypoint
+import thedarkcolour.kotlinforforge.forge.MOD_BUS
+
+@Mod({{name}}.ID)
+object {{name}}Forge {
+    init {
+        requireNotNull({{name}})
+        Entrypoint.construct()
+        MOD_BUS.apply {
+            addListener<FMLCommonSetupEvent> {
+                Entrypoint.init()
+            }
+            addListener<FMLClientSetupEvent> { Entrypoint.clientInit() }
+        }
+    }
+}

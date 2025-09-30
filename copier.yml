@@ -1,0 +1,59 @@
+name:
+  type: str
+  help: An awesome mod needs an awesome name. Tell me yours.
+  validator: >-
+    {% if not (name | regex_search('^[a-zA-Z][a-zA-Z0-9]+$')) %}
+    name must start with a letter, followed one or more letters or digits.
+    {% endif %}
+
+id:
+  type: str
+  help: A unique identifier for the mod.
+  default: >-
+    {{ name | to_snake }}
+  validator: >-
+    {% if not (id | regex_search('^[a-z][a-z0-9\_]+$')) %}
+    id must start with a letter, followed one or more letters, underlines or digits.
+    {% endif %}
+
+slug:
+  type: str
+  help: A slug for the mod.
+  default: >-
+    {{ name | to_kebab }}
+  validator: >-
+    {% if not (slug | regex_search('^[a-z][a-z0-9\-]+$')) %}
+    slug must start with a letter, followed one or more letters, dashes or digits.
+    {% endif %}
+
+description:
+  type: str
+  help: A short description of the mod.
+  default: >-
+    {{ name }}
+
+author:
+  type: str
+  help: The author's name.
+  default: SettingDust
+
+group:
+  type: str
+  help: Group
+  default: >-
+    {{ author | lower }}.{{ id }}
+  validator: >-
+    {% if not (group | regex_search('^[a-z][a-z0-9\_\.]+$')) %}
+    group must start with a letter, followed one or more letters, underlines, digits or dots.
+    {% endif %}
+
+license:
+  type: str
+  help: The license of the mod.
+  default: Apache License 2.0
+
+_jinja_extensions:
+  - jinja2_strcase.StrcaseExtension
+
+_tasks:
+    - "git init"

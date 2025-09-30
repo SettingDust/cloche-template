@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "{{group}}.fabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "{{id}}.fabric.refmap.json",
+  "mixins": [
+    "AbstractContainerMenuMixin",
+    "LivingEntityMixin"
+  ],
+  "client": [
+  ]
+}

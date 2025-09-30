@@ -1,0 +1,19 @@
+package {{group}}.fabric
+
+import {{group}}.{{name}}
+import {{group}}.adapter.Entrypoint
+
+object {{name}}Fabric {
+    init {
+        requireNotNull({{name}})
+        Entrypoint.construct()
+    }
+
+    fun init() {
+        Entrypoint.init()
+    }
+
+    fun clientInit() {
+        Entrypoint.clientInit()
+    }
+}
