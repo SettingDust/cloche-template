@@ -57,3 +57,5 @@ _jinja_extensions:
 
 _tasks:
     - "git init"
+
+_exclude: ["copier.yaml", "copier.yml", "~*", ".git", ".DS_Store", "README.md"]
