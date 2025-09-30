@@ -57,5 +57,6 @@ _jinja_extensions:
 
 _tasks:
     - "git init"
+    - "git update-index --chmod=+x gradlew"
 
 _exclude: ["copier.yaml", "copier.yml", "~*", ".git", ".DS_Store", "README.md"]
