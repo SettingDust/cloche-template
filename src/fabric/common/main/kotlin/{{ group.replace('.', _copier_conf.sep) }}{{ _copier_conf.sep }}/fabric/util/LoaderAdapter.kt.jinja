@@ -1,9 +1,8 @@
-package {{group}}.fabric.adapter
+package {{group}}.fabric.util
 
 import net.fabricmc.api.EnvType
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.world.item.ItemStack
-import {{group}}.adapter.LoaderAdapter
+import {{group}}.util.LoaderAdapter
 
 class LoaderAdapter : LoaderAdapter {
     override val isClient = FabricLoader.getInstance().environmentType === EnvType.CLIENT
