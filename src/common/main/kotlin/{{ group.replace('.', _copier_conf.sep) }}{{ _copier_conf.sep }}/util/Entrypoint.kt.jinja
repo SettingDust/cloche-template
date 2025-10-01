@@ -1,7 +1,5 @@
 package {{group}}.util
 
-import {{group}}.util.ServiceLoaderUtil
-
 interface Entrypoint {
     companion object : Entrypoint {
         private val services by lazy { ServiceLoaderUtil.findServices<Entrypoint>(required = false) }

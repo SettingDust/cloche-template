@@ -1,7 +1,5 @@
 package {{group}}.util
 
-import {{group}}.util.ServiceLoaderUtil
-
 interface LoaderAdapter {
     companion object : LoaderAdapter by ServiceLoaderUtil.findService()
 

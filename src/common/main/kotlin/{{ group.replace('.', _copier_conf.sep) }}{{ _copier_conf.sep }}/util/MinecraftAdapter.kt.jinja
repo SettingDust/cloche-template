@@ -1,7 +1,6 @@
 package {{group}}.util
 
 import net.minecraft.resources.ResourceLocation
-import {{group}}.util.ServiceLoaderUtil
 
 interface MinecraftAdapter {
     companion object : MinecraftAdapter by ServiceLoaderUtil.findService()
