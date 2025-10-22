@@ -365,16 +365,16 @@ cloche {
             tasks {
                 val jar = register<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
                     group = "build"
-                    archiveBaseName = "$id-${featureName.camelToKebabCase()}"
+
                     archiveClassifier = "neoforge"
                     destinationDirectory = intermediateOutputsDirectory
                 }
 
                 val includesJar = register<JarJar>(lowerCamelCaseGradleName(featureName, "includeJar")) {
+                    group = "build"
                     dependsOn(targets.map { it.includeJarTaskName })
 
                     archiveBaseName = "$id-${featureName.camelToKebabCase()}"
-                    archiveClassifier = "neoforge"
                     input = jar.flatMap { it.archiveFile }
                     fromResolutionResults(include)
                 }
