@@ -375,7 +375,6 @@ cloche {
                     group = "build"
                     dependsOn(targets.map { it.includeJarTaskName })
 
-                    archiveBaseName = "$id-${featureName.camelToKebabCase()}"
                     input = jar.flatMap { it.archiveFile }
                     fromResolutionResults(include)
                 }
