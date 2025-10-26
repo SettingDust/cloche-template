@@ -1,10 +1,11 @@
 package {{group}}.util
 
 import org.apache.logging.log4j.Logger
+import {{group}}.{{name}}
 import java.util.*
 
 object ServiceLoaderUtil {
-    lateinit var defaultLogger: Logger
+    val defaultLogger: Logger = {{name}}.LOGGER
 
     inline fun <reified T> load() = ServiceLoader.load(T::class.java)!!
 

@@ -9,9 +9,5 @@ object {{name}} {
 
     val LOGGER = LogManager.getLogger()
 
-    init {
-        ServiceLoaderUtil.defaultLogger = LOGGER
-    }
-
     fun id(path: String) = MinecraftAdapter.id(ID, path)
 }
