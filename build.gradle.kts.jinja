@@ -199,7 +199,7 @@ cloche {
                 for (target in targets) {
                     include(project(":")) {
                         capabilities {
-                            requireFeature(target.capabilitySuffix)
+                            requireFeature(target.capabilitySuffix!!)
                         }
                     }
                 }
@@ -356,7 +356,7 @@ cloche {
                 for (target in targets) {
                     include(project(":")) {
                         capabilities {
-                            requireFeature(target.capabilitySuffix)
+                            requireFeature(target.capabilitySuffix!!)
                         }
                     }
                 }
