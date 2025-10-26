@@ -433,11 +433,6 @@ val MinecraftTarget.generateModsManifestTaskName: String
         else -> throw IllegalArgumentException("Unsupported target $this")
     }
 
-fun String.camelToKebabCase(): String {
-    val pattern = "(?<=.)[A-Z]".toRegex()
-    return this.replace(pattern, "-$0").lowercase()
-}
-
 tasks {
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.WARN
