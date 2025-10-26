@@ -318,6 +318,7 @@ cloche {
     run neoforge@{
         val neoforge121 = neoforge("neoforge:1.21") {
             minecraftVersion = "1.21.1"
+            loaderVersion = "21.1.192"
 
             metadata {
                 modLoader = "kotlinforforge"
@@ -383,17 +384,6 @@ cloche {
 
                 build {
                     dependsOn(includesJar)
-                }
-            }
-        }
-
-        targets.withType<NeoforgeTarget> {
-            loaderVersion = "21.1.192"
-
-            metadata {
-                modLoader = "kotlinforforge"
-                loaderVersion {
-                    start = "5"
                 }
             }
         }
