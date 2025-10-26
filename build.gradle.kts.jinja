@@ -209,7 +209,7 @@ cloche {
                 val generateModJson =
                     register<GenerateFabricModJson>(lowerCamelCaseGradleName(featureName, "generateModJson")) {
                         modId = id
-                        targetMetadata = objects.newInstance(FabricMetadata::class.java).apply {
+                        targetMetadata = objects.newInstance(FabricMetadata::class.java, fabric1201).apply {
                             license.value(cloche.metadata.license)
                             dependencies.value(cloche.metadata.dependencies)
                         }
