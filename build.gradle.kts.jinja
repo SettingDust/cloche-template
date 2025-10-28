@@ -375,6 +375,7 @@ cloche {
                     group = "build"
                     dependsOn(targets.map { it.includeJarTaskName })
 
+                    archiveClassifier = "neoforge"
                     input = jar.flatMap { it.archiveFile }
                     fromResolutionResults(include)
                 }
