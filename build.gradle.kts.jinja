@@ -27,7 +27,7 @@ plugins {
 
     id("com.gradleup.shadow") version "9.2.2"
 
-    id("earth.terrarium.cloche") version "0.16.3"
+    id("earth.terrarium.cloche") version "0.16.9-dust"
 }
 
 val archive_name: String by rootProject.properties
@@ -295,6 +295,11 @@ cloche {
                         end = "1.21"
                     }
                 }
+
+                dependency {
+                    modId = "preloading_tricks"
+                    type = CommonMetadata.Dependency.Type.Required
+                }
             }
 
             repositories {
@@ -311,6 +316,64 @@ cloche {
                 implementation(catalog.mixinextras.forge)
 
                 modImplementation("thedarkcolour:kotlinforforge:4.11.0")
+            }
+
+            tasks {
+                named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
+                    manifest {
+                        attributes(
+                            "ForgeVariant" to "LexForge"
+                        )
+                    }
+                }
+            }
+        }
+
+        run container@{
+            val featureName = "containerForge"
+            val include = configurations.register(lowerCamelCaseGradleName(featureName, "include")) {
+                isCanBeResolved = true
+                isTransitive = false
+
+                attributes {
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, true)
+                    attribute(CompilationAttributes.DATA, false)
+                }
+            }
+            val targets = setOf(forge1201)
+
+            dependencies {
+                for (target in targets) {
+                    include(project(":")) {
+                        capabilities {
+                            requireFeature(target.capabilitySuffix!!)
+                        }
+                    }
+                }
+            }
+
+            tasks {
+                val jar = register<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
+                    group = "build"
+
+                    archiveClassifier = "forge"
+                    destinationDirectory = intermediateOutputsDirectory
+                }
+
+                val includesJar = register<JarJar>(lowerCamelCaseGradleName(featureName, "includeJar")) {
+                    group = "build"
+                    dependsOn(targets.map { it.includeJarTaskName })
+
+                    archiveClassifier = "forge"
+                    input = jar.flatMap { it.archiveFile }
+                    fromResolutionResults(include)
+                }
+
+                containerTasks += includesJar
+
+                build {
+                    dependsOn(includesJar)
+                }
             }
         }
     }
@@ -333,10 +396,25 @@ cloche {
                         start = "1.21"
                     }
                 }
+
+                dependency {
+                    modId = "preloading_tricks"
+                    type = CommonMetadata.Dependency.Type.Required
+                }
             }
 
             dependencies {
                 modImplementation("thedarkcolour:kotlinforforge-neoforge:5.9.0")
+            }
+
+            tasks {
+                named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
+                    manifest {
+                        attributes(
+                            "ForgeVariant" to "NeoForge"
+                        )
+                    }
+                }
             }
         }
 
@@ -361,6 +439,8 @@ cloche {
                         }
                     }
                 }
+
+                include(catalog.preloadingTricks)
             }
 
             tasks {
@@ -452,7 +532,7 @@ tasks {
 
         for (task in containerTasks) {
             from(task.map { zipTree(it.archiveFile) })
-            manifest.inheritFrom(task.get().manifest)
+            manifest.from(task.get().manifest)
         }
 
         manifest {
@@ -462,6 +542,40 @@ tasks {
         }
 
         append("META-INF/accesstransformer.cfg")
+
+        transform(object : ResourceTransformer {
+            private val gson = GsonBuilder().setPrettyPrinting().create()
+            private val collected = JsonArray()
+            private val path = "META-INF/jarjar/metadata.json"
+            private var transformed = false
+
+            override fun canTransformResource(element: FileTreeElement): Boolean {
+                return element.path == path
+            }
+
+            override fun transform(context: TransformerContext) {
+                context.inputStream.use { input ->
+                    val json = gson.fromJson(input.reader(Charsets.UTF_8), JsonObject::class.java)
+                    val jars = json.getAsJsonArray("jars")
+                    jars?.forEach { collected.add(it) }
+                    transformed = true
+                }
+            }
+
+            override fun hasTransformedResource(): Boolean = transformed
+
+            override fun modifyOutputStream(os: ZipOutputStream, preserveFileTimestamps: Boolean) {
+                if (collected.size() == 0) return
+
+                val merged = JsonObject().apply {
+                    add("jars", collected)
+                }
+
+                os.putNextEntry(ZipEntry(path))
+                os.write(gson.toJson(merged).toByteArray(StandardCharsets.UTF_8))
+                os.closeEntry()
+            }
+        })
     }
 
     val shadowSourcesJar by registering(ShadowJar::class) {
@@ -482,22 +596,32 @@ tasks {
         dependsOn(shadowContainersJar, shadowSourcesJar)
     }
 
-    // https://github.com/terrarium-earth/cloche/issues/115
-    val remapFabricMinecraftIntermediary by registering {
-        dependsOn(cloche.targets.filterIsInstance<FabricTarget>().flatMap {
-            listOf(
+    for (target in cloche.targets.filterIsInstance<FabricTarget>()) {
+        named(lowerCamelCaseGradleName("accessWiden", target.featureName, "commonMinecraft")) {
+            dependsOn(
                 lowerCamelCaseGradleName(
                     "remap",
-                    it.name,
+                    target.featureName,
                     "commonMinecraft",
                     MinecraftCodevFabricPlugin.INTERMEDIARY_MAPPINGS_NAMESPACE,
                 ), lowerCamelCaseGradleName(
                     "remap",
-                    it.name,
+                    target.featureName,
                     "clientMinecraft",
                     MinecraftCodevFabricPlugin.INTERMEDIARY_MAPPINGS_NAMESPACE,
-                )
+                ), lowerCamelCaseGradleName("generate", target.featureName, "MappingsArtifact")
             )
-        })
+        }
+
+        named(lowerCamelCaseGradleName("accessWiden", target.featureName, "Minecraft")) {
+            dependsOn(
+                lowerCamelCaseGradleName(
+                    "remap",
+                    target.featureName,
+                    "clientMinecraft",
+                    MinecraftCodevFabricPlugin.INTERMEDIARY_MAPPINGS_NAMESPACE,
+                ), lowerCamelCaseGradleName("generate", target.featureName, "MappingsArtifact")
+            )
+        }
     }
 }
