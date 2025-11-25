@@ -36,7 +36,7 @@ plugins {
 
     id("com.gradleup.shadow") version "9.2.2"
 
-    id("earth.terrarium.cloche") version "0.16.9-dust"
+    id("earth.terrarium.cloche") version "0.16.19-dust"
 }
 
 val archive_name: String by rootProject.properties
@@ -198,8 +198,9 @@ cloche {
                 isTransitive = false
 
                 attributes {
-                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, true)
-                    attribute(CompilationAttributes.DATA, false)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+                    attribute(REMAPPED_ATTRIBUTE, false)
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
             val targets = setOf(fabric1201, fabric121)
@@ -345,8 +346,9 @@ cloche {
                 isTransitive = false
 
                 attributes {
-                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, true)
-                    attribute(CompilationAttributes.DATA, false)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+                    attribute(REMAPPED_ATTRIBUTE, false)
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
             val targets = setOf(forge1201)
@@ -434,8 +436,9 @@ cloche {
                 isTransitive = false
 
                 attributes {
-                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, true)
-                    attribute(CompilationAttributes.DATA, false)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+                    attribute(REMAPPED_ATTRIBUTE, false)
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
             val targets = setOf(neoforge121)
