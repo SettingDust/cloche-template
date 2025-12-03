@@ -32,11 +32,11 @@ plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
 
-    id("com.palantir.git-version") version "4.1.0"
+    id("com.palantir.git-version") version "4.2.0"
 
     id("com.gradleup.shadow") version "9.2.2"
 
-    id("earth.terrarium.cloche") version "0.16.19-dust"
+    id("earth.terrarium.cloche") version "0.16.21-dust"
 }
 
 val archive_name: String by rootProject.properties
@@ -87,10 +87,27 @@ class MinecraftVersionCompatibilityRule : AttributeCompatibilityRule<String> {
     }
 }
 
+class MinecraftModLoaderCompatibilityRule : AttributeCompatibilityRule<MinecraftModLoader> {
+    override fun execute(details: CompatibilityCheckDetails<MinecraftModLoader>) {
+        if (details.producerValue == MinecraftModLoader.common) {
+            details.compatible()
+        }
+    }
+}
+
 dependencies {
     attributesSchema {
         attribute(TargetAttributes.MINECRAFT_VERSION) {
             compatibilityRules.add(MinecraftVersionCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.MOD_LOADER) {
+            compatibilityRules.add(MinecraftModLoaderCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.CLOCHE_MINECRAFT_VERSION) {
+            compatibilityRules.add(MinecraftVersionCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.CLOCHE_MOD_LOADER) {
+            compatibilityRules.add(MinecraftModLoaderCompatibilityRule::class)
         }
     }
 }
@@ -223,7 +240,7 @@ cloche {
                             license.value(cloche.metadata.license)
                             dependencies.value(cloche.metadata.dependencies)
                         }
-                        loaderDependencyVersion = "0.17"
+                        loaderDependencyVersion = "0.18"
                         output.set(metadataDirectory.map { it.file("fabric.mod.json") })
                     }
 
@@ -252,7 +269,7 @@ cloche {
         }
 
         targets.withType<FabricTarget> {
-            loaderVersion = "0.17.3"
+            loaderVersion = "0.18.1"
 
             includedClient()
 

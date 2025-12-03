@@ -32,6 +32,11 @@ jobs:
           token: ${{ '{{' }} github.token }}
           tag: ${{ '{{' }} github.ref_name }}
 
+      - name: Git Status
+        run: |
+          git status --porcelain
+          ./gradlew printVersion
+
       - name: Upload bundled jar
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
@@ -66,7 +71,7 @@ jobs:
           dependencies: |
             fabric-language-kotlin
             kotlin-for-forge
-            preloading-tricks(embedded)
+            preloading-tricks
 
           java: |
             17
