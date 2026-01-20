@@ -37,9 +37,9 @@ plugins {
 
     id("com.palantir.git-version") version "4.2.0"
 
-    id("com.gradleup.shadow") version "9.2.2"
+    id("com.gradleup.shadow") version "9.3.0"
 
-    id("earth.terrarium.cloche") version "0.16.21-dust"
+    id("earth.terrarium.cloche") version "0.17.7-dust.0"
 }
 
 val archive_name: String by rootProject.properties
@@ -63,9 +63,9 @@ repositories {
         }
     }
 
-    maven("https://thedarkcolour.github.io/KotlinForForge/") {
+    maven("https://repo.nyon.dev/releases") {
         content {
-            includeGroup("thedarkcolour")
+            includeGroup("dev.nyon")
         }
     }
 
@@ -272,7 +272,7 @@ cloche {
         }
 
         targets.withType<FabricTarget> {
-            loaderVersion = "0.18.1"
+            loaderVersion = "0.18.4"
 
             includedClient()
 
@@ -312,9 +312,9 @@ cloche {
             loaderVersion = "47.4.4"
 
             metadata {
-                modLoader = "kotlinforforge"
+                modLoader = "klf"
                 loaderVersion {
-                    start = "4"
+                    start = "1"
                 }
 
                 dependency {
@@ -415,9 +415,9 @@ cloche {
             loaderVersion = "21.1.192"
 
             metadata {
-                modLoader = "kotlinforforge"
+                modLoader = "klf"
                 loaderVersion {
-                    start = "5"
+                    start = "1"
                 }
 
                 dependency {
@@ -549,6 +549,18 @@ val MinecraftTarget.generateModsManifestTaskName: String
         is ForgeLikeTarget -> generateModsTomlTaskName
         else -> throw IllegalArgumentException("Unsupported target $this")
     }
+
+val MinecraftTarget.jarTaskName: String
+    get() = lowerCamelCaseGradleName(featureName, "jar")
+
+val MinecraftTarget.remapJarTaskName: String
+    get() = lowerCamelCaseGradleName(featureName, "remapJar")
+
+val MinecraftTarget.accessWidenTaskName: String
+    get() = lowerCamelCaseGradleName("accessWiden", featureName, "minecraft")
+
+val MinecraftTarget.decompileMinecraftTaskName: String
+    get() = lowerCamelCaseGradleName("decompile", featureName, "minecraft")
 
 tasks {
     withType<ProcessResources> {
