@@ -1,0 +1,18 @@
+package {{group}}.fabric;
+
+import net.fabricmc.api.ModInitializer;
+import {{group}}.{{name}};
+import {{group}}.util.Entrypoint;
+
+public class {{name}}Fabric implements ModInitializer {
+    static {
+        @SuppressWarnings("unused")
+        String id = {{name}}.ID;
+        Entrypoint.construct();
+    }
+
+    @Override
+    public void onInitialize() {
+        Entrypoint.init();
+    }
+}

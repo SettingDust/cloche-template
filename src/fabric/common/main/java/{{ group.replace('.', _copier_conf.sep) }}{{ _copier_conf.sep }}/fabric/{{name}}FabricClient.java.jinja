@@ -1,0 +1,11 @@
+package {{group}}.fabric;
+
+import net.fabricmc.api.ClientModInitializer;
+import {{group}}.util.Entrypoint;
+
+public class {{name}}FabricClient implements ClientModInitializer {
+    @Override
+    public void onInitializeClient() {
+        Entrypoint.clientInit();
+    }
+}

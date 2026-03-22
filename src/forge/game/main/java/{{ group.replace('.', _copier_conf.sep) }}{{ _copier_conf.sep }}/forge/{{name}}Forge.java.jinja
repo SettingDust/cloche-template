@@ -1,0 +1,29 @@
+package {{group}}.forge;
+
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import {{group}}.{{name}};
+import {{group}}.util.Entrypoint;
+
+@Mod({{name}}.ID)
+public class {{name}}Forge {
+    public {{name}}Forge() {
+        @SuppressWarnings("unused")
+        String id = {{name}}.ID;
+        Entrypoint.construct();
+
+        var modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(this::commonSetup);
+        modBus.addListener(this::clientSetup);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        Entrypoint.Delegate.init();
+    }
+
+    private void clientSetup(FMLClientSetupEvent event) {
+        Entrypoint.clientInit();
+    }
+}
