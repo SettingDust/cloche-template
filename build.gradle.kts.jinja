@@ -28,19 +28,25 @@ import org.apache.tools.zip.ZipOutputStream
 import org.gradle.jvm.tasks.Jar
 import java.nio.charset.StandardCharsets
 
+// region Plugins
+
 plugins {
     java
     idea
 
+{% if language == 'kotlin' %}
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
 
+{% endif %}
     id("com.palantir.git-version") version "4.2.0"
 
     id("com.gradleup.shadow") version "9.3.0"
 
     id("earth.terrarium.cloche") version "0.17.7-dust.0"
 }
+
+// region Project Properties
 
 val archive_name: String by rootProject.properties
 val id: String by rootProject.properties
@@ -52,6 +58,8 @@ val gitVersion: Closure<String> by extra
 version = gitVersion()
 
 base { archivesName = archive_name }
+
+// region Repositories
 
 repositories {
     exclusiveContent {
@@ -84,6 +92,8 @@ repositories {
     mavenLocal()
 }
 
+// region Attribute Compatibility Rules
+
 class MinecraftVersionCompatibilityRule : AttributeCompatibilityRule<String> {
     override fun execute(details: CompatibilityCheckDetails<String>) {
         details.compatible()
@@ -115,9 +125,13 @@ dependencies {
     }
 }
 
+// region Cloche Configuration
+
 val containerTasks = mutableSetOf<TaskProvider<out Jar>>()
 
 cloche {
+    // region Metadata & Mappings
+
     metadata {
         modId = id
         name = rootProject.property("name").toString()
@@ -141,7 +155,11 @@ cloche {
         official()
     }
 
-    common {
+    // region Common Targets
+
+    common()
+
+    val commonMain = common("common:common") {
         // mixins.from(file("src/common/main/resources/$id.mixins.json"))
         // accessWideners.from(file("src/common/main/resources/$id.accessWidener"))
 
@@ -150,21 +168,39 @@ cloche {
         }
     }
 
-    val commons = mapOf(
-        "1.20.1" to common("common:1.20.1") {
-            // mixins.from("src/common/1.20.1/main/resources/$id.1_20.mixins.json")
-        },
-        "1.21.1" to common("common:1.21.1") {
-            // mixins.from("src/common/1.21.1/main/resources/$id.1_21.mixins.json")
-        },
-    )
+    val common1201 = common("common:1.20.1") {
+        dependsOn(commonMain)
+        // mixins.from("src/common/1.20.1/main/resources/$id.1_20.mixins.json")
+    }
+    val common121 = common("common:1.21.1") {
+        dependsOn(commonMain)
+        // mixins.from("src/common/1.21.1/main/resources/$id.1_21.mixins.json")
+    }
+
+    // region Game Targets
+
+    val commonGame = common("common:game") {
+        dependsOn(commonMain)
+    }
+
+    val commonGame1201 = common("common:game:1.20.1") {
+        dependsOn(commonGame)
+    }
+    val commonGame121 = common("common:game:1.21.1") {
+        dependsOn(commonGame)
+    }
+
+    // region Fabric
 
     run fabric@{
         val fabricCommon = common("fabric:common") {
+            dependsOn(commonMain)
             // mixins.from(file("src/fabric/common/main/resources/$id.fabric.mixins.json"))
         }
 
         val fabric1201 = fabric("fabric:1.20.1") {
+            dependsOn(commonMain, common1201, commonGame, commonGame1201, fabricCommon)
+
             minecraftVersion = "1.20.1"
 
             metadata {
@@ -188,6 +224,8 @@ cloche {
         }
 
         val fabric121 = fabric("fabric:1.21") {
+            dependsOn(commonMain, common121, commonGame, commonGame121, fabricCommon)
+
             minecraftVersion = "1.21.1"
 
             metadata {
@@ -206,6 +244,52 @@ cloche {
 
             tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
                 modId = "${id}_1_21"
+            }
+        }
+
+        fabric("version:fabric:1.20.1") {
+            minecraftVersion = "1.20.1"
+
+            runs { client() }
+
+            dependencies {
+                fabricApi("0.92.6")
+
+                runtimeOnly(project(":")) {
+                    capabilities {
+                        requireFeature(fabric1201.capabilitySuffix!!)
+                    }
+                }
+            }
+
+            tasks {
+                named(generateModsManifestTaskName) { enabled = false }
+                named(jarTaskName) { enabled = false }
+                named(remapJarTaskName) { enabled = false }
+                named(includeJarTaskName) { enabled = false }
+            }
+        }
+
+        fabric("version:fabric:1.21") {
+            minecraftVersion = "1.21.1"
+
+            runs { client() }
+
+            dependencies {
+                fabricApi("0.116.6")
+
+                runtimeOnly(project(":")) {
+                    capabilities {
+                        requireFeature(fabric121.capabilitySuffix!!)
+                    }
+                }
+            }
+
+            tasks {
+                named(generateModsManifestTaskName) { enabled = false }
+                named(jarTaskName) { enabled = false }
+                named(remapJarTaskName) { enabled = false }
+                named(includeJarTaskName) { enabled = false }
             }
         }
 
@@ -279,6 +363,7 @@ cloche {
             dependsOn(fabricCommon)
 
             metadata {
+{% if language == 'kotlin' %}
                 entrypoint("main") {
                     adapter = "kotlin"
                     value = "$group.fabric.{{name}}Fabric::init"
@@ -288,34 +373,71 @@ cloche {
                     adapter = "kotlin"
                     value = "$group.fabric.{{name}}Fabric::clientInit"
                 }
+{% else %}
+                entrypoint("main") {
+                    value = "$group.fabric.{{name}}Fabric"
+                }
+
+                entrypoint("client") {
+                    value = "$group.fabric.{{name}}FabricClient"
+                }
+{% endif %}
 
                 dependency {
                     modId = "fabric-api"
                     type = CommonMetadata.Dependency.Type.Required
                 }
+{% if language == 'kotlin' %}
 
                 dependency {
                     modId = "fabric-language-kotlin"
                     type = CommonMetadata.Dependency.Type.Required
                 }
+{% endif %}
             }
+{% if language == 'kotlin' %}
 
             dependencies {
                 modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
             }
+{% endif %}
         }
     }
 
+    // region Forge
+
     run forge@{
-        val forge1201 = forge("forge:1.20.1") {
+{% if has_service %}
+        val forgeService = forge("forge:service") {
+            dependsOn(commonMain, common1201)
+
+            minecraftVersion = "1.20.1"
+            loaderVersion = "47.4.4"
+
+            tasks {
+                named(generateModsTomlTaskName) { enabled = false }
+            }
+        }
+
+{% endif %}
+        val forgeGame = forge("forge:game") {
+            dependsOn(commonGame, commonGame1201)
+
             minecraftVersion = "1.20.1"
             loaderVersion = "47.4.4"
 
             metadata {
+{% if language == 'kotlin' %}
                 modLoader = "klf"
                 loaderVersion {
                     start = "1"
                 }
+{% else %}
+                modLoader = "javafml"
+                loaderVersion {
+                    start = "47"
+                }
+{% endif %}
 
                 dependency {
                     modId = "minecraft"
@@ -344,8 +466,18 @@ cloche {
                 implementation("org.spongepowered:mixin:0.8.7")
                 compileOnly(catalog.mixinextras.common)
                 implementation(catalog.mixinextras.forge)
+{% if language == 'kotlin' %}
 
                 modImplementation(catalog.klf.mc120.forge)
+{% endif %}
+{% if has_service %}
+
+                implementation(project(":")) {
+                    capabilities {
+                        requireFeature(forgeService.capabilitySuffix!!)
+                    }
+                }
+{% endif %}
             }
 
             tasks {
@@ -359,8 +491,49 @@ cloche {
             }
         }
 
+        forge("version:forge:1.20.1") {
+            minecraftVersion = "1.20.1"
+            loaderVersion = "47.4.4"
+
+            runs {
+                client {
+                    env("MOD_CLASSES", "")
+                }
+            }
+
+            dependencies {
+                implementation(project(":")) {
+                    capabilities {
+                        requireFeature(forgeGame.capabilitySuffix!!)
+                    }
+                }
+            }
+
+            tasks {
+                named(generateModsManifestTaskName) { enabled = false }
+                named(jarTaskName) { enabled = false }
+                named(remapJarTaskName) { enabled = false }
+                named(includeJarTaskName) { enabled = false }
+            }
+        }
+
         run container@{
             val featureName = "containerForge"
+{% if has_service %}
+            val embed = configurations.register(lowerCamelCaseGradleName(featureName, "embed")) {
+                isCanBeResolved = true
+                isTransitive = false
+
+                attributes {
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements.CLASSES_AND_RESOURCES)
+                    )
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
+                }
+            }
+
+{% endif %}
             val include = configurations.register(lowerCamelCaseGradleName(featureName, "include")) {
                 isCanBeResolved = true
                 isTransitive = false
@@ -371,7 +544,7 @@ cloche {
                     attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
-            val targets = setOf(forge1201)
+            val targets = setOf(forgeGame)
 
             dependencies {
                 for (target in targets) {
@@ -382,6 +555,16 @@ cloche {
                     }
                 }
             }
+{% if has_service %}
+
+            project.dependencies {
+                embed(project(":")) {
+                    capabilities {
+                        requireFeature(forgeService.capabilitySuffix!!)
+                    }
+                }
+            }
+{% endif %}
 
             tasks {
                 val jar = register<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
@@ -389,6 +572,10 @@ cloche {
 
                     archiveClassifier = "forge"
                     destinationDirectory = intermediateOutputsDirectory
+{% if has_service %}
+
+                    from(embed)
+{% endif %}
                 }
 
                 val includesJar = register<JarJar>(lowerCamelCaseGradleName(featureName, "includeJar")) {
@@ -409,16 +596,40 @@ cloche {
         }
     }
 
+    // region NeoForge
+
     run neoforge@{
-        val neoforge121 = neoforge("neoforge:1.21") {
+{% if has_service %}
+        val neoforgeService = neoforge("neoforge:service") {
+            dependsOn(commonMain, common121)
+
+            minecraftVersion = "1.21.1"
+            loaderVersion = "21.1.192"
+
+            tasks {
+                named(generateModsTomlTaskName) { enabled = false }
+            }
+        }
+
+{% endif %}
+        val neoforgeGame = neoforge("neoforge:game") {
+            dependsOn(commonGame, commonGame121)
+
             minecraftVersion = "1.21.1"
             loaderVersion = "21.1.192"
 
             metadata {
+{% if language == 'kotlin' %}
                 modLoader = "klf"
                 loaderVersion {
                     start = "1"
                 }
+{% else %}
+                modLoader = "javafml"
+                loaderVersion {
+                    start = "4"
+                }
+{% endif %}
 
                 dependency {
                     modId = "minecraft"
@@ -435,7 +646,17 @@ cloche {
             }
 
             dependencies {
+{% if language == 'kotlin' %}
                 modImplementation(catalog.klf.mc121.neoforge)
+{% endif %}
+{% if has_service %}
+
+                implementation(project(":")) {
+                    capabilities {
+                        requireFeature(neoforgeService.capabilitySuffix!!)
+                    }
+                }
+{% endif %}
             }
 
             tasks {
@@ -449,8 +670,49 @@ cloche {
             }
         }
 
+        neoforge("version:neoforge:1.21.1") {
+            minecraftVersion = "1.21.1"
+            loaderVersion = "21.1.192"
+
+            runs {
+                client {
+                    env("MOD_CLASSES", "")
+                }
+            }
+
+            dependencies {
+                implementation(project(":")) {
+                    capabilities {
+                        requireFeature(neoforgeGame.capabilitySuffix!!)
+                    }
+                }
+            }
+
+            tasks {
+                named(generateModsManifestTaskName) { enabled = false }
+                named(jarTaskName) { enabled = false }
+                named(remapJarTaskName) { enabled = false }
+                named(includeJarTaskName) { enabled = false }
+            }
+        }
+
         run container@{
             val featureName = "containerNeoforge"
+{% if has_service %}
+            val embed = configurations.register(lowerCamelCaseGradleName(featureName, "embed")) {
+                isCanBeResolved = true
+                isTransitive = false
+
+                attributes {
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        objects.named(LibraryElements.CLASSES_AND_RESOURCES)
+                    )
+                    attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
+                }
+            }
+
+{% endif %}
             val include = configurations.register(lowerCamelCaseGradleName(featureName, "include")) {
                 isCanBeResolved = true
                 isTransitive = false
@@ -461,7 +723,7 @@ cloche {
                     attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
-            val targets = setOf(neoforge121)
+            val targets = setOf(neoforgeGame)
 
             dependencies {
                 for (target in targets) {
@@ -474,6 +736,16 @@ cloche {
 
                 include(catalog.preloadingTricks)
             }
+{% if has_service %}
+
+            project.dependencies {
+                embed(project(":")) {
+                    capabilities {
+                        requireFeature(neoforgeService.capabilitySuffix!!)
+                    }
+                }
+            }
+{% endif %}
 
             tasks {
                 val jar = register<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
@@ -481,6 +753,10 @@ cloche {
 
                     archiveClassifier = "neoforge"
                     destinationDirectory = intermediateOutputsDirectory
+{% if has_service %}
+
+                    from(embed)
+{% endif %}
                 }
 
                 val includesJar = register<JarJar>(lowerCamelCaseGradleName(featureName, "includeJar")) {
@@ -501,9 +777,9 @@ cloche {
         }
     }
 
-    targets.all {
-        dependsOn(commons.getValue(minecraftVersion.get()))
+    // region All Targets Configuration
 
+    targets.all {
         runs {
             (client as LazyConfigurableInternal<MinecraftRunConfiguration>).onConfigured {
                 it.jvmArguments(
@@ -526,6 +802,8 @@ cloche {
         }
     }
 }
+
+// region Extension Properties
 
 val SourceSet.includeJarTaskName: String
     get() = lowerCamelCaseGradleName(takeUnless(SourceSet::isMain)?.name, "includeJar")
@@ -561,6 +839,8 @@ val MinecraftTarget.accessWidenTaskName: String
 
 val MinecraftTarget.decompileMinecraftTaskName: String
     get() = lowerCamelCaseGradleName("decompile", featureName, "minecraft")
+
+// region Tasks
 
 tasks {
     withType<ProcessResources> {

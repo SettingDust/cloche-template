@@ -52,6 +52,19 @@ license:
   help: The license of the mod.
   default: Apache License 2.0
 
+has_service:
+  type: bool
+  help: Whether to create service targets for forge/neoforge (shared platform code separated from game code).
+  default: false
+
+language:
+  type: str
+  help: The programming language for the mod source code.
+  choices:
+    - kotlin
+    - java
+  default: kotlin
+
 _jinja_extensions:
   - jinja2_strcase.StrcaseExtension
 
@@ -60,4 +73,15 @@ _tasks:
     - "git add ."
     - "git update-index --chmod=+x ./gradlew"
 
-_exclude: ["copier.yaml", "copier.yml", "~*", ".git", ".DS_Store", "README.md", ".idea"]
+_exclude:
+  - "copier.yaml"
+  - "copier.yml"
+  - "~*"
+  - ".git"
+  - ".DS_Store"
+  - "README.md"
+  - ".idea"
+  - "{% if not has_service %}src/forge/service{% endif %}"
+  - "{% if not has_service %}src/neoforge/service{% endif %}"
+  - "{% if language == 'java' %}**/main/kotlin{% endif %}"
+  - "{% if language == 'kotlin' %}**/main/java{% endif %}"
