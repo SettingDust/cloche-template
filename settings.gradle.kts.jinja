@@ -160,12 +160,12 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
         artifact = "KotlinLangForge"
         versionFormat = { _, ver -> "2.10.6-k2.2.21-$ver" }
 
-        version("1_20") {
+        version("20") {
             modVersion = "2.0"
             loader("forge") { version(VersionFormatter.plusLoader) }
         }
 
-        version("1_21") {
+        version("21") {
             modVersion = "3.1"
             loader("neoforge") { version(VersionFormatter.plusLoader) }
         }

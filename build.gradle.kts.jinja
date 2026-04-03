@@ -168,13 +168,13 @@ cloche {
         }
     }
 
-    val common1201 = common("common:1.20.1") {
+    val common201 = common("common:20.1") {
         dependsOn(commonMain)
-        // mixins.from("src/common/1.20.1/main/resources/$id.1_20.mixins.json")
+        // mixins.from("src/common/20.1/main/resources/$id.20_1.mixins.json")
     }
-    val common121 = common("common:1.21.1") {
+    val common211 = common("common:21.1") {
         dependsOn(commonMain)
-        // mixins.from("src/common/1.21.1/main/resources/$id.1_21.mixins.json")
+        // mixins.from("src/common/21.1/main/resources/$id.21_1.mixins.json")
     }
 
     // region Game Targets
@@ -183,10 +183,10 @@ cloche {
         dependsOn(commonMain)
     }
 
-    val commonGame1201 = common("common:game:1.20.1") {
+    val commonGame201 = common("common:game:20.1") {
         dependsOn(commonGame)
     }
-    val commonGame121 = common("common:game:1.21.1") {
+    val commonGame211 = common("common:game:21.1") {
         dependsOn(commonGame)
     }
 
@@ -198,8 +198,8 @@ cloche {
             // mixins.from(file("src/fabric/common/main/resources/$id.fabric.mixins.json"))
         }
 
-        val fabric1201 = fabric("fabric:1.20.1") {
-            dependsOn(commonMain, common1201, commonGame, commonGame1201, fabricCommon)
+        val fabric201 = fabric("fabric:20.1") {
+            dependsOn(commonMain, common201, commonGame, commonGame201, fabricCommon)
 
             minecraftVersion = "1.20.1"
 
@@ -219,12 +219,12 @@ cloche {
             }
 
             tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-                modId = "${id}_1_20"
+                modId = "${id}_20_1"
             }
         }
 
-        val fabric121 = fabric("fabric:1.21") {
-            dependsOn(commonMain, common121, commonGame, commonGame121, fabricCommon)
+        val fabric211 = fabric("fabric:21.1") {
+            dependsOn(commonMain, common211, commonGame, commonGame211, fabricCommon)
 
             minecraftVersion = "1.21.1"
 
@@ -243,11 +243,11 @@ cloche {
             }
 
             tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-                modId = "${id}_1_21"
+                modId = "${id}_21_1"
             }
         }
 
-        fabric("version:fabric:1.20.1") {
+        fabric("version:fabric:20.1") {
             minecraftVersion = "1.20.1"
 
             runs { client() }
@@ -257,7 +257,7 @@ cloche {
 
                 runtimeOnly(project(":")) {
                     capabilities {
-                        requireFeature(fabric1201.capabilitySuffix!!)
+                        requireFeature(fabric201.capabilitySuffix!!)
                     }
                 }
             }
@@ -270,7 +270,7 @@ cloche {
             }
         }
 
-        fabric("version:fabric:1.21") {
+        fabric("version:fabric:21.1") {
             minecraftVersion = "1.21.1"
 
             runs { client() }
@@ -280,7 +280,7 @@ cloche {
 
                 runtimeOnly(project(":")) {
                     capabilities {
-                        requireFeature(fabric121.capabilitySuffix!!)
+                        requireFeature(fabric211.capabilitySuffix!!)
                     }
                 }
             }
@@ -307,7 +307,7 @@ cloche {
                     attribute(INCLUDE_TRANSFORMED_OUTPUT_ATTRIBUTE, false)
                 }
             }
-            val targets = setOf(fabric1201, fabric121)
+            val targets = setOf(fabric201, fabric211)
 
             dependencies {
                 for (target in targets) {
@@ -323,7 +323,7 @@ cloche {
                 val generateModJson =
                     register<GenerateFabricModJson>(lowerCamelCaseGradleName(featureName, "generateModJson")) {
                         modId = id
-                        metadata = objects.newInstance(FabricMetadata::class.java, fabric1201).apply {
+                        metadata = objects.newInstance(FabricMetadata::class.java, fabric201).apply {
                             license.value(cloche.metadata.license)
                             dependencies.value(cloche.metadata.dependencies)
                         }
@@ -409,7 +409,7 @@ cloche {
     run forge@{
 {% if has_service %}
         val forgeService = forge("forge:service") {
-            dependsOn(commonMain, common1201)
+            dependsOn(commonMain, common201)
 
             minecraftVersion = "1.20.1"
             loaderVersion = "47.4.4"
@@ -421,7 +421,7 @@ cloche {
 
 {% endif %}
         val forgeGame = forge("forge:game") {
-            dependsOn(commonGame, commonGame1201)
+            dependsOn(commonGame, commonGame201)
 
             minecraftVersion = "1.20.1"
             loaderVersion = "47.4.4"
@@ -468,7 +468,7 @@ cloche {
                 implementation(catalog.mixinextras.forge)
 {% if language == 'kotlin' %}
 
-                modImplementation(catalog.klf.mc120.forge)
+                modImplementation(catalog.klf.mc20.forge)
 {% endif %}
 {% if has_service %}
 
@@ -491,7 +491,7 @@ cloche {
             }
         }
 
-        forge("version:forge:1.20.1") {
+        forge("version:forge:20.1") {
             minecraftVersion = "1.20.1"
             loaderVersion = "47.4.4"
 
@@ -601,7 +601,7 @@ cloche {
     run neoforge@{
 {% if has_service %}
         val neoforgeService = neoforge("neoforge:service") {
-            dependsOn(commonMain, common121)
+            dependsOn(commonMain, common211)
 
             minecraftVersion = "1.21.1"
             loaderVersion = "21.1.192"
@@ -613,7 +613,7 @@ cloche {
 
 {% endif %}
         val neoforgeGame = neoforge("neoforge:game") {
-            dependsOn(commonGame, commonGame121)
+            dependsOn(commonGame, commonGame211)
 
             minecraftVersion = "1.21.1"
             loaderVersion = "21.1.192"
@@ -647,7 +647,7 @@ cloche {
 
             dependencies {
 {% if language == 'kotlin' %}
-                modImplementation(catalog.klf.mc121.neoforge)
+                modImplementation(catalog.klf.mc21.neoforge)
 {% endif %}
 {% if has_service %}
 
@@ -670,7 +670,7 @@ cloche {
             }
         }
 
-        neoforge("version:neoforge:1.21.1") {
+        neoforge("version:neoforge:21.1") {
             minecraftVersion = "1.21.1"
             loaderVersion = "21.1.192"
 
