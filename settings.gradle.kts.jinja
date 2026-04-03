@@ -1,4 +1,4 @@
-// region Plugin Management
+// #region Plugin Management
 
 dependencyResolutionManagement {
     pluginManagement {
@@ -14,7 +14,9 @@ dependencyResolutionManagement {
     }
 }
 
-// region Multi-Version Dependency DSL
+// #endregion
+
+// #region Multi-Version Dependency DSL
 
 fun interface ArtifactFormatter {
     fun format(artifact: String, loader: String, mcVersion: String): String
@@ -135,7 +137,9 @@ fun VersionCatalogBuilder.modrinth(id: String, block: MultiVersionDepBuilder.() 
     dependency(id, "maven.modrinth", block)
 }
 
-// region Version Catalog
+// #endregion
+
+// #region Version Catalog
 
 dependencyResolutionManagement.versionCatalogs.create("catalog") {
     library("mixin-fabric", "net.fabricmc", "sponge-mixin")
@@ -173,10 +177,14 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
 {% endif %}
 }
 
-// region Project Settings
+// #endregion
+
+// #region Project Settings
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "{{ name }}"
+
+// #endregion

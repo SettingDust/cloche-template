@@ -32,7 +32,7 @@ import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.jvm.tasks.Jar
 import java.nio.charset.StandardCharsets
 
-// region Plugins
+// #region Plugins
 
 plugins {
     java
@@ -50,7 +50,9 @@ plugins {
     id("earth.terrarium.cloche") version "0.18.10-dust.4"
 }
 
-// region Project Properties
+// #endregion
+
+// #region Project Properties
 
 val archive_name: String by rootProject.properties
 val id: String by rootProject.properties
@@ -63,7 +65,9 @@ version = gitVersion()
 
 base { archivesName = archive_name }
 
-// region Repositories
+// #endregion
+
+// #region Repositories
 
 repositories {
     exclusiveContent {
@@ -119,7 +123,9 @@ repositories {
     mavenLocal()
 }
 
-// region Container DSL
+// #endregion
+
+// #region Container DSL
 
 private fun MinecraftModLoader.containerFeatureName(): String =
     lowerCamelCaseGradleName("container", toString().lowercase())
@@ -401,7 +407,9 @@ fun ClocheExtension.container(
     ContainerScope(project, loader).apply(block)
 }
 
-// region Attribute Compatibility Rules
+// #endregion
+
+// #region Attribute Compatibility Rules
 
 class MinecraftVersionCompatibilityRule : AttributeCompatibilityRule<String> {
     override fun execute(details: CompatibilityCheckDetails<String>) {
@@ -434,10 +442,12 @@ dependencies {
     }
 }
 
-// region Cloche Configuration
+// #endregion
+
+// #region Cloche Configuration
 
 cloche {
-    // region Metadata & Mappings
+    // #region Metadata & Mappings
 
     metadata {
         modId = id
@@ -462,13 +472,15 @@ cloche {
         official()
     }
 
-    // region Common Targets
+    // #endregion
+
+    // #region Common Targets
 
     common()
 
-    val commonMain = common("common:common") {
-        // mixins.from(file("src/common/main/resources/$id.mixins.json"))
-        // accessWideners.from(file("src/common/main/resources/$id.accessWidener"))
+    val commonMain = common("common:common:main") {
+        // mixins.from(file("src/common/common/main/resources/$id.mixins.json"))
+        // accessWideners.from(file("src/common/common/main/resources/$id.accessWidener"))
 
         dependencies {
             compileOnly("org.spongepowered:mixin:0.8.7")
@@ -484,20 +496,24 @@ cloche {
         // mixins.from("src/common/21.1/main/resources/$id.21_1.mixins.json")
     }
 
-    // region Game Targets
+    // #endregion
 
-    val commonGame = common("common:game") {
+    // #region Game Targets
+
+    val commonGame = common("game:main") {
         dependsOn(commonMain)
     }
 
-    val commonGame201 = common("common:game:20.1") {
+    val commonGame201 = common("game:20.1") {
         dependsOn(commonGame)
     }
-    val commonGame211 = common("common:game:21.1") {
+    val commonGame211 = common("game:21.1") {
         dependsOn(commonGame)
     }
 
-    // region Main Targets - Fabric
+    // #endregion
+
+    // #region Main Targets - Fabric
 
     val fabricCommon = common("fabric:common") {
         dependsOn(commonMain)
@@ -553,7 +569,9 @@ cloche {
         }
     }
 
-    // region Main Targets - Forge
+    // #endregion
+
+    // #region Main Targets - Forge
 
 {% if has_service %}
     val forgeService = forge("forge:service") {
@@ -639,7 +657,9 @@ cloche {
         }
     }
 
-    // region Main Targets - NeoForge
+    // #endregion
+
+    // #region Main Targets - NeoForge
 
 {% if has_service %}
     val neoforgeService = neoforge("neoforge:service") {
@@ -712,9 +732,11 @@ cloche {
         }
     }
 
-    // region Version Targets
+    // #endregion
 
-    // region Fabric Version Targets
+    // #region Version Targets
+
+    // #region Fabric Version Targets
 
     fabric("version:fabric:20.1") {
         minecraftVersion = "1.20.1"
@@ -762,7 +784,9 @@ cloche {
         }
     }
 
-    // region Forge Version Targets
+    // #endregion
+
+    // #region Forge Version Targets
 
     forge("version:forge:20.1") {
         minecraftVersion = "1.20.1"
@@ -790,7 +814,9 @@ cloche {
         }
     }
 
-    // region NeoForge Version Targets
+    // #endregion
+
+    // #region NeoForge Version Targets
 
     neoforge("version:neoforge:21.1") {
         minecraftVersion = "1.21.1"
@@ -818,9 +844,11 @@ cloche {
         }
     }
 
-    // region Containers
+    // #endregion
 
-    // region Fabric Container
+    // #region Containers
+
+    // #region Fabric Container
 
     container(loader = MinecraftModLoader.fabric) {
         val metadataDirectory = project.layout.buildDirectory.dir("generated")
@@ -847,7 +875,9 @@ cloche {
         }
     }
 
-    // region Forge Container
+    // #endregion
+
+    // #region Forge Container
 
     container(loader = MinecraftModLoader.forge) {
 {% if has_service %}
@@ -867,7 +897,9 @@ cloche {
         }
     }
 
-    // region NeoForge Container
+    // #endregion
+
+    // #region NeoForge Container
 
     container(loader = MinecraftModLoader.neoforge) {
 {% if has_service %}
@@ -889,7 +921,9 @@ cloche {
         }
     }
 
-    // region Shared Target Defaults
+    // #endregion
+
+    // #region Shared Target Defaults
 
     targets.withType<FabricTarget> {
         loaderVersion = "0.18.4"
@@ -962,9 +996,12 @@ cloche {
                 ?.let(::parchment)
         }
     }
+    // #endregion
 }
 
-// region Extension Properties
+// #endregion
+
+// #region Extension Properties
 
 val SourceSet.includeJarTaskName: String
     get() = lowerCamelCaseGradleName(takeUnless(SourceSet::isMain)?.name, "includeJar")
@@ -1001,7 +1038,9 @@ val MinecraftTarget.accessWidenTaskName: String
 val MinecraftTarget.decompileMinecraftTaskName: String
     get() = lowerCamelCaseGradleName("decompile", featureName, "minecraft")
 
-// region Tasks
+// #endregion
+
+// #region Tasks
 
 tasks {
     withType<ProcessResources> {
@@ -1112,3 +1151,5 @@ tasks {
         }
     }
 }
+
+// #endregion
