@@ -41,12 +41,9 @@ plugins {
 {% if language == 'kotlin' %}
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
-
 {% endif %}
     id("com.palantir.git-version") version "5.0.0"
-
     id("com.gradleup.shadow") version "9.4.1"
-
     id("earth.terrarium.cloche") version "0.18.10-dust.4"
 }
 
@@ -584,7 +581,6 @@ cloche {
             named(generateModsTomlTaskName) { enabled = false }
         }
     }
-
 {% endif %}
     val forgeGame = forge("forge:game") {
         dependsOn(commonGame201)
@@ -633,7 +629,6 @@ cloche {
             compileOnly(catalog.mixinextras.common)
             implementation(catalog.mixinextras.forge)
 {% if language == 'kotlin' %}
-
             modImplementation(catalog.klf.mc20.forge)
 {% endif %}
 {% if has_service %}
@@ -672,7 +667,6 @@ cloche {
             named(generateModsTomlTaskName) { enabled = false }
         }
     }
-
 {% endif %}
     val neoforgeGame = neoforge("neoforge:game") {
         dependsOn(commonGame211)
@@ -882,7 +876,6 @@ cloche {
     container(loader = MinecraftModLoader.forge) {
 {% if has_service %}
         embed()
-
 {% endif %}
         dependencies {
             includeTarget(forgeGame)
@@ -904,7 +897,6 @@ cloche {
     container(loader = MinecraftModLoader.neoforge) {
 {% if has_service %}
         embed()
-
 {% endif %}
         dependencies {
             includeTarget(neoforgeGame)
@@ -958,7 +950,6 @@ cloche {
                 type = CommonMetadata.Dependency.Type.Required
             }
 {% if language == 'kotlin' %}
-
             dependency {
                 modId = "fabric-language-kotlin"
                 type = CommonMetadata.Dependency.Type.Required
@@ -966,7 +957,6 @@ cloche {
 {% endif %}
         }
 {% if language == 'kotlin' %}
-
         dependencies {
             modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
         }
