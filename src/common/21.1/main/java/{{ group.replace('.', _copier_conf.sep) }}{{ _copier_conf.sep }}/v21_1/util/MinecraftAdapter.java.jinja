@@ -1,0 +1,10 @@
+package {{group}}.v21_1.util;
+
+import net.minecraft.resources.ResourceLocation;
+
+public class MinecraftAdapter implements {{group}}.util.MinecraftAdapter {
+    @Override
+    public ResourceLocation id(String namespace, String path) {
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+    }
+}
