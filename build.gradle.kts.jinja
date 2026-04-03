@@ -505,7 +505,7 @@ cloche {
     }
 
     val fabric201 = fabric("fabric:20.1") {
-        dependsOn(commonMain, common201, commonGame, commonGame201, fabricCommon)
+        dependsOn(common201, commonGame201, fabricCommon)
 
         minecraftVersion = "1.20.1"
 
@@ -530,7 +530,7 @@ cloche {
     }
 
     val fabric211 = fabric("fabric:21.1") {
-        dependsOn(commonMain, common211, commonGame, commonGame211, fabricCommon)
+        dependsOn(common211, commonGame211, fabricCommon)
 
         minecraftVersion = "1.21.1"
 
@@ -557,7 +557,7 @@ cloche {
 
 {% if has_service %}
     val forgeService = forge("forge:service") {
-        dependsOn(commonMain, common201)
+        dependsOn(common201)
 
         minecraftVersion = "1.20.1"
         loaderVersion = "47.4.4"
@@ -569,7 +569,7 @@ cloche {
 
 {% endif %}
     val forgeGame = forge("forge:game") {
-        dependsOn(commonGame, commonGame201)
+        dependsOn(commonGame201)
 
         minecraftVersion = "1.20.1"
         loaderVersion = "47.4.4"
@@ -643,7 +643,7 @@ cloche {
 
 {% if has_service %}
     val neoforgeService = neoforge("neoforge:service") {
-        dependsOn(commonMain, common211)
+        dependsOn(common211)
 
         minecraftVersion = "1.21.1"
         loaderVersion = "21.1.192"
@@ -655,7 +655,7 @@ cloche {
 
 {% endif %}
     val neoforgeGame = neoforge("neoforge:game") {
-        dependsOn(commonGame, commonGame211)
+        dependsOn(commonGame211)
 
         minecraftVersion = "1.21.1"
         loaderVersion = "21.1.192"
