@@ -28,6 +28,7 @@ import net.msrandom.minecraftcodev.forge.task.JarJar
 import net.msrandom.minecraftcodev.runs.MinecraftRunConfiguration
 import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipOutputStream
+import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.jvm.tasks.Jar
 import java.nio.charset.StandardCharsets
 
@@ -78,6 +79,29 @@ repositories {
         content {
             includeGroup("dev.nyon")
         }
+    }
+
+    maven("https://maven.lenni0451.net/snapshots/") {
+        content {
+            includeGroupAndSubgroups("net.lenni0451")
+        }
+    }
+
+    maven("https://maven.su5ed.dev/releases") {
+        content {
+            includeGroupAndSubgroups("dev.su5ed.sinytra")
+            includeGroupAndSubgroups("org.sinytra")
+        }
+    }
+
+    maven("https://maven.sinytra.org/") {
+        content {
+            includeGroupAndSubgroups("org.sinytra")
+        }
+    }
+
+    maven("https://raw.githubusercontent.com/settingdust/maven/main/repository/") {
+        name = "SettingDust's Maven"
     }
 
     mavenCentral()
@@ -473,437 +497,447 @@ cloche {
         dependsOn(commonGame)
     }
 
-    // region Fabric
+    // region Main Targets - Fabric
 
-    run fabric@{
-        val fabricCommon = common("fabric:common") {
-            dependsOn(commonMain)
-            // mixins.from(file("src/fabric/common/main/resources/$id.fabric.mixins.json"))
-        }
+    val fabricCommon = common("fabric:common") {
+        dependsOn(commonMain)
+        // mixins.from(file("src/fabric/common/main/resources/$id.fabric.mixins.json"))
+    }
 
-        val fabric201 = fabric("fabric:20.1") {
-            dependsOn(commonMain, common201, commonGame, commonGame201, fabricCommon)
+    val fabric201 = fabric("fabric:20.1") {
+        dependsOn(commonMain, common201, commonGame, commonGame201, fabricCommon)
 
-            minecraftVersion = "1.20.1"
+        minecraftVersion = "1.20.1"
 
-            metadata {
-                dependency {
-                    modId = "minecraft"
-                    type = CommonMetadata.Dependency.Type.Required
-                    version {
-                        start = "1.20.1"
-                        end = "1.21"
-                    }
+        metadata {
+            dependency {
+                modId = "minecraft"
+                type = CommonMetadata.Dependency.Type.Required
+                version {
+                    start = "1.20.1"
+                    end = "1.21"
                 }
             }
-
-            dependencies {
-                fabricApi("0.92.6")
-            }
-
-            tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-                modId = "${id}_20_1"
-            }
         }
 
-        val fabric211 = fabric("fabric:21.1") {
-            dependsOn(commonMain, common211, commonGame, commonGame211, fabricCommon)
+        dependencies {
+            fabricApi("0.92.6")
+        }
 
-            minecraftVersion = "1.21.1"
+        tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
+            modId = "${id}_20_1"
+        }
+    }
 
-            metadata {
-                dependency {
-                    modId = "minecraft"
-                    type = CommonMetadata.Dependency.Type.Required
-                    version {
-                        start = "1.21"
-                    }
+    val fabric211 = fabric("fabric:21.1") {
+        dependsOn(commonMain, common211, commonGame, commonGame211, fabricCommon)
+
+        minecraftVersion = "1.21.1"
+
+        metadata {
+            dependency {
+                modId = "minecraft"
+                type = CommonMetadata.Dependency.Type.Required
+                version {
+                    start = "1.21"
                 }
             }
-
-            dependencies {
-                fabricApi("0.116.6")
-            }
-
-            tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-                modId = "${id}_21_1"
-            }
         }
 
-        fabric("version:fabric:20.1") {
-            minecraftVersion = "1.20.1"
-
-            runs { client() }
-
-            dependencies {
-                fabricApi("0.92.6")
-
-                runtimeOnly(project(":")) {
-                    capabilities {
-                        requireFeature(fabric201.capabilitySuffix!!)
-                    }
-                }
-            }
-
-            tasks {
-                named(generateModsManifestTaskName) { enabled = false }
-                named(jarTaskName) { enabled = false }
-                named(remapJarTaskName) { enabled = false }
-                named(includeJarTaskName) { enabled = false }
-            }
+        dependencies {
+            fabricApi("0.116.6")
         }
 
-        fabric("version:fabric:21.1") {
-            minecraftVersion = "1.21.1"
-
-            runs { client() }
-
-            dependencies {
-                fabricApi("0.116.6")
-
-                runtimeOnly(project(":")) {
-                    capabilities {
-                        requireFeature(fabric211.capabilitySuffix!!)
-                    }
-                }
-            }
-
-            tasks {
-                named(generateModsManifestTaskName) { enabled = false }
-                named(jarTaskName) { enabled = false }
-                named(remapJarTaskName) { enabled = false }
-                named(includeJarTaskName) { enabled = false }
-            }
+        tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
+            modId = "${id}_21_1"
         }
+    }
 
-        container(loader = MinecraftModLoader.fabric) {
-            val metadataDirectory = project.layout.buildDirectory.dir("generated")
-                .map { it.dir("metadata").dir(featureName) }
-            val generateModJson =
-                tasks.register<GenerateFabricModJson>(lowerCamelCaseGradleName(featureName, "generateModJson")) {
-                    modId = id
-                    metadata = objects.newInstance(FabricMetadata::class.java, fabric201).apply {
-                        license.value(cloche.metadata.license)
-                        dependencies.value(cloche.metadata.dependencies)
-                    }
-                    loaderDependencyVersion = "0.18"
-                    output.set(metadataDirectory.map { it.file("fabric.mod.json") })
-                }
+    // region Main Targets - Forge
 
-            dependencies {
-                includeTarget(fabric201)
-                includeTarget(fabric211)
-            }
+{% if has_service %}
+    val forgeService = forge("forge:service") {
+        dependsOn(commonMain, common201)
 
-            jar {
-                dependsOn(generateModJson)
-                from(metadataDirectory)
-            }
+        minecraftVersion = "1.20.1"
+        loaderVersion = "47.4.4"
+
+        tasks {
+            named(generateModsTomlTaskName) { enabled = false }
         }
+    }
 
-        targets.withType<FabricTarget> {
-            loaderVersion = "0.18.4"
+{% endif %}
+    val forgeGame = forge("forge:game") {
+        dependsOn(commonGame, commonGame201)
 
-            includedClient()
+        minecraftVersion = "1.20.1"
+        loaderVersion = "47.4.4"
 
-            dependsOn(fabricCommon)
-
-            metadata {
+        metadata {
 {% if language == 'kotlin' %}
-                entrypoint("main") {
-                    adapter = "kotlin"
-                    value = "$group.fabric.{{name}}Fabric::init"
-                }
-
-                entrypoint("client") {
-                    adapter = "kotlin"
-                    value = "$group.fabric.{{name}}Fabric::clientInit"
-                }
+            modLoader = "klf"
+            loaderVersion {
+                start = "1"
+            }
 {% else %}
-                entrypoint("main") {
-                    value = "$group.fabric.{{name}}Fabric"
-                }
-
-                entrypoint("client") {
-                    value = "$group.fabric.{{name}}FabricClient"
-                }
-{% endif %}
-
-                dependency {
-                    modId = "fabric-api"
-                    type = CommonMetadata.Dependency.Type.Required
-                }
-{% if language == 'kotlin' %}
-
-                dependency {
-                    modId = "fabric-language-kotlin"
-                    type = CommonMetadata.Dependency.Type.Required
-                }
-{% endif %}
+            modLoader = "javafml"
+            loaderVersion {
+                start = "47"
             }
+{% endif %}
+
+            dependency {
+                modId = "minecraft"
+                type = CommonMetadata.Dependency.Type.Required
+                version {
+                    start = "1.20.1"
+                    end = "1.21"
+                }
+            }
+
+            dependency {
+                modId = "preloading_tricks"
+                type = CommonMetadata.Dependency.Type.Required
+            }
+        }
+
+        repositories {
+            maven("https://repo.spongepowered.org/maven") {
+                content {
+                    includeGroup("org.spongepowered")
+                }
+            }
+        }
+
+        dependencies {
+            implementation("org.spongepowered:mixin:0.8.7")
+            compileOnly(catalog.mixinextras.common)
+            implementation(catalog.mixinextras.forge)
 {% if language == 'kotlin' %}
 
-            dependencies {
-                modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
+            modImplementation(catalog.klf.mc20.forge)
+{% endif %}
+{% if has_service %}
+
+            implementation(project(":")) {
+                capabilities {
+                    requireFeature(forgeService.capabilitySuffix!!)
+                }
+            }
+{% endif %}
+        }
+
+        tasks {
+            named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
+                manifest {
+                    attributes(
+                        "ForgeVariant" to "LexForge"
+                    )
+                }
+            }
+        }
+    }
+
+    // region Main Targets - NeoForge
+
+{% if has_service %}
+    val neoforgeService = neoforge("neoforge:service") {
+        dependsOn(commonMain, common211)
+
+        minecraftVersion = "1.21.1"
+        loaderVersion = "21.1.192"
+
+        tasks {
+            named(generateModsTomlTaskName) { enabled = false }
+        }
+    }
+
+{% endif %}
+    val neoforgeGame = neoforge("neoforge:game") {
+        dependsOn(commonGame, commonGame211)
+
+        minecraftVersion = "1.21.1"
+        loaderVersion = "21.1.192"
+
+        metadata {
+{% if language == 'kotlin' %}
+            modLoader = "klf"
+            loaderVersion {
+                start = "1"
+            }
+{% else %}
+            modLoader = "javafml"
+            loaderVersion {
+                start = "4"
+            }
+{% endif %}
+
+            dependency {
+                modId = "minecraft"
+                type = CommonMetadata.Dependency.Type.Required
+                version {
+                    start = "1.21"
+                }
+            }
+
+            dependency {
+                modId = "preloading_tricks"
+                type = CommonMetadata.Dependency.Type.Required
+            }
+        }
+
+        dependencies {
+{% if language == 'kotlin' %}
+            modImplementation(catalog.klf.mc21.neoforge)
+{% endif %}
+{% if has_service %}
+
+            implementation(project(":")) {
+                capabilities {
+                    requireFeature(neoforgeService.capabilitySuffix!!)
+                }
+            }
+{% endif %}
+        }
+
+        tasks {
+            named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
+                manifest {
+                    attributes(
+                        "ForgeVariant" to "NeoForge"
+                    )
+                }
+            }
+        }
+    }
+
+    // region Version Targets
+
+    // region Fabric Version Targets
+
+    fabric("version:fabric:20.1") {
+        minecraftVersion = "1.20.1"
+
+        runs { client() }
+
+        dependencies {
+            fabricApi("0.92.6")
+
+            runtimeOnly(project(":")) {
+                capabilities {
+                    requireFeature(fabric201.capabilitySuffix!!)
+                }
+            }
+        }
+
+        tasks {
+            named(generateModsManifestTaskName) { enabled = false }
+            named(jarTaskName) { enabled = false }
+            named(remapJarTaskName) { enabled = false }
+            named(includeJarTaskName) { enabled = false }
+        }
+    }
+
+    fabric("version:fabric:21.1") {
+        minecraftVersion = "1.21.1"
+
+        runs { client() }
+
+        dependencies {
+            fabricApi("0.116.6")
+
+            runtimeOnly(project(":")) {
+                capabilities {
+                    requireFeature(fabric211.capabilitySuffix!!)
+                }
+            }
+        }
+
+        tasks {
+            named(generateModsManifestTaskName) { enabled = false }
+            named(jarTaskName) { enabled = false }
+            named(remapJarTaskName) { enabled = false }
+            named(includeJarTaskName) { enabled = false }
+        }
+    }
+
+    // region Forge Version Targets
+
+    forge("version:forge:20.1") {
+        minecraftVersion = "1.20.1"
+        loaderVersion = "47.4.4"
+
+        runs {
+            client {
+                env("MOD_CLASSES", "")
+            }
+        }
+
+        dependencies {
+            implementation(project(":")) {
+                capabilities {
+                    requireFeature(forgeGame.capabilitySuffix!!)
+                }
+            }
+        }
+
+        tasks {
+            named(generateModsManifestTaskName) { enabled = false }
+            named(jarTaskName) { enabled = false }
+            named(remapJarTaskName) { enabled = false }
+            named(includeJarTaskName) { enabled = false }
+        }
+    }
+
+    // region NeoForge Version Targets
+
+    neoforge("version:neoforge:21.1") {
+        minecraftVersion = "1.21.1"
+        loaderVersion = "21.1.192"
+
+        runs {
+            client {
+                env("MOD_CLASSES", "")
+            }
+        }
+
+        dependencies {
+            implementation(project(":")) {
+                capabilities {
+                    requireFeature(neoforgeGame.capabilitySuffix!!)
+                }
+            }
+        }
+
+        tasks {
+            named(generateModsManifestTaskName) { enabled = false }
+            named(jarTaskName) { enabled = false }
+            named(remapJarTaskName) { enabled = false }
+            named(includeJarTaskName) { enabled = false }
+        }
+    }
+
+    // region Containers
+
+    // region Fabric Container
+
+    container(loader = MinecraftModLoader.fabric) {
+        val metadataDirectory = project.layout.buildDirectory.dir("generated")
+            .map { it.dir("metadata").dir(featureName) }
+        val generateModJson =
+            tasks.register<GenerateFabricModJson>(lowerCamelCaseGradleName(featureName, "generateModJson")) {
+                modId = id
+                metadata = objects.newInstance(FabricMetadata::class.java, fabric201).apply {
+                    license.value(cloche.metadata.license)
+                    dependencies.value(cloche.metadata.dependencies)
+                }
+                loaderDependencyVersion = "0.18"
+                output.set(metadataDirectory.map { it.file("fabric.mod.json") })
+            }
+
+        dependencies {
+            includeTarget(fabric201)
+            includeTarget(fabric211)
+        }
+
+        jar {
+            dependsOn(generateModJson)
+            from(metadataDirectory)
+        }
+    }
+
+    // region Forge Container
+
+    container(loader = MinecraftModLoader.forge) {
+{% if has_service %}
+        embed()
+
+{% endif %}
+        dependencies {
+            includeTarget(forgeGame)
+{% if has_service %}
+
+            embed(project(":")) {
+                capabilities {
+                    requireFeature(forgeService.capabilitySuffix!!)
+                }
             }
 {% endif %}
         }
     }
 
-    // region Forge
+    // region NeoForge Container
 
-    run forge@{
+    container(loader = MinecraftModLoader.neoforge) {
 {% if has_service %}
-        val forgeService = forge("forge:service") {
-            dependsOn(commonMain, common201)
-
-            minecraftVersion = "1.20.1"
-            loaderVersion = "47.4.4"
-
-            tasks {
-                named(generateModsTomlTaskName) { enabled = false }
-            }
-        }
+        embed()
 
 {% endif %}
-        val forgeGame = forge("forge:game") {
-            dependsOn(commonGame, commonGame201)
+        dependencies {
+            includeTarget(neoforgeGame)
 
-            minecraftVersion = "1.20.1"
-            loaderVersion = "47.4.4"
-
-            metadata {
-{% if language == 'kotlin' %}
-                modLoader = "klf"
-                loaderVersion {
-                    start = "1"
-                }
-{% else %}
-                modLoader = "javafml"
-                loaderVersion {
-                    start = "47"
-                }
-{% endif %}
-
-                dependency {
-                    modId = "minecraft"
-                    type = CommonMetadata.Dependency.Type.Required
-                    version {
-                        start = "1.20.1"
-                        end = "1.21"
-                    }
-                }
-
-                dependency {
-                    modId = "preloading_tricks"
-                    type = CommonMetadata.Dependency.Type.Required
-                }
-            }
-
-            repositories {
-                maven("https://repo.spongepowered.org/maven") {
-                    content {
-                        includeGroup("org.spongepowered")
-                    }
-                }
-            }
-
-            dependencies {
-                implementation("org.spongepowered:mixin:0.8.7")
-                compileOnly(catalog.mixinextras.common)
-                implementation(catalog.mixinextras.forge)
-{% if language == 'kotlin' %}
-
-                modImplementation(catalog.klf.mc20.forge)
-{% endif %}
+            include(catalog.preloadingTricks)
 {% if has_service %}
 
-                implementation(project(":")) {
-                    capabilities {
-                        requireFeature(forgeService.capabilitySuffix!!)
-                    }
+            embed(project(":")) {
+                capabilities {
+                    requireFeature(neoforgeService.capabilitySuffix!!)
                 }
+            }
 {% endif %}
-            }
-
-            tasks {
-                named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
-                    manifest {
-                        attributes(
-                            "ForgeVariant" to "LexForge"
-                        )
-                    }
-                }
-            }
-        }
-
-        forge("version:forge:20.1") {
-            minecraftVersion = "1.20.1"
-            loaderVersion = "47.4.4"
-
-            runs {
-                client {
-                    env("MOD_CLASSES", "")
-                }
-            }
-
-            dependencies {
-                implementation(project(":")) {
-                    capabilities {
-                        requireFeature(forgeGame.capabilitySuffix!!)
-                    }
-                }
-            }
-
-            tasks {
-                named(generateModsManifestTaskName) { enabled = false }
-                named(jarTaskName) { enabled = false }
-                named(remapJarTaskName) { enabled = false }
-                named(includeJarTaskName) { enabled = false }
-            }
-        }
-
-        container(loader = MinecraftModLoader.forge) {
-{% if has_service %}
-            embed()
-
-{% endif %}
-            dependencies {
-                includeTarget(forgeGame)
-{% if has_service %}
-
-                embed(project(":")) {
-                    capabilities {
-                        requireFeature(forgeService.capabilitySuffix!!)
-                    }
-                }
-{% endif %}
-            }
         }
     }
 
-    // region NeoForge
+    // region Shared Target Defaults
 
-    run neoforge@{
-{% if has_service %}
-        val neoforgeService = neoforge("neoforge:service") {
-            dependsOn(commonMain, common211)
+    targets.withType<FabricTarget> {
+        loaderVersion = "0.18.4"
 
-            minecraftVersion = "1.21.1"
-            loaderVersion = "21.1.192"
+        includedClient()
 
-            tasks {
-                named(generateModsTomlTaskName) { enabled = false }
-            }
-        }
+        dependsOn(fabricCommon)
 
-{% endif %}
-        val neoforgeGame = neoforge("neoforge:game") {
-            dependsOn(commonGame, commonGame211)
-
-            minecraftVersion = "1.21.1"
-            loaderVersion = "21.1.192"
-
-            metadata {
+        metadata {
 {% if language == 'kotlin' %}
-                modLoader = "klf"
-                loaderVersion {
-                    start = "1"
-                }
+            entrypoint("main") {
+                adapter = "kotlin"
+                value = "$group.fabric.{{name}}Fabric::init"
+            }
+
+            entrypoint("client") {
+                adapter = "kotlin"
+                value = "$group.fabric.{{name}}Fabric::clientInit"
+            }
 {% else %}
-                modLoader = "javafml"
-                loaderVersion {
-                    start = "4"
-                }
-{% endif %}
-
-                dependency {
-                    modId = "minecraft"
-                    type = CommonMetadata.Dependency.Type.Required
-                    version {
-                        start = "1.21"
-                    }
-                }
-
-                dependency {
-                    modId = "preloading_tricks"
-                    type = CommonMetadata.Dependency.Type.Required
-                }
+            entrypoint("main") {
+                value = "$group.fabric.{{name}}Fabric"
             }
 
-            dependencies {
+            entrypoint("client") {
+                value = "$group.fabric.{{name}}FabricClient"
+            }
+{% endif %}
+
+            dependency {
+                modId = "fabric-api"
+                type = CommonMetadata.Dependency.Type.Required
+            }
 {% if language == 'kotlin' %}
-                modImplementation(catalog.klf.mc21.neoforge)
-{% endif %}
-{% if has_service %}
 
-                implementation(project(":")) {
-                    capabilities {
-                        requireFeature(neoforgeService.capabilitySuffix!!)
-                    }
-                }
+            dependency {
+                modId = "fabric-language-kotlin"
+                type = CommonMetadata.Dependency.Type.Required
+            }
 {% endif %}
-            }
-
-            tasks {
-                named<Jar>(lowerCamelCaseGradleName(featureName, "jar")) {
-                    manifest {
-                        attributes(
-                            "ForgeVariant" to "NeoForge"
-                        )
-                    }
-                }
-            }
         }
+{% if language == 'kotlin' %}
 
-        neoforge("version:neoforge:21.1") {
-            minecraftVersion = "1.21.1"
-            loaderVersion = "21.1.192"
-
-            runs {
-                client {
-                    env("MOD_CLASSES", "")
-                }
-            }
-
-            dependencies {
-                implementation(project(":")) {
-                    capabilities {
-                        requireFeature(neoforgeGame.capabilitySuffix!!)
-                    }
-                }
-            }
-
-            tasks {
-                named(generateModsManifestTaskName) { enabled = false }
-                named(jarTaskName) { enabled = false }
-                named(remapJarTaskName) { enabled = false }
-                named(includeJarTaskName) { enabled = false }
-            }
+        dependencies {
+            modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
         }
-
-        container(loader = MinecraftModLoader.neoforge) {
-{% if has_service %}
-            embed()
-
 {% endif %}
-            dependencies {
-                includeTarget(neoforgeGame)
-
-                include(catalog.preloadingTricks)
-{% if has_service %}
-
-                embed(project(":")) {
-                    capabilities {
-                        requireFeature(neoforgeService.capabilitySuffix!!)
-                    }
-                }
-{% endif %}
-            }
-        }
     }
-
-    // region All Targets Configuration
 
     targets.all {
         runs {
@@ -1057,5 +1091,24 @@ tasks {
 
     build {
         dependsOn(shadowContainersJar, shadowSourcesJar)
+    }
+
+    afterEvaluate {
+        (components["java"] as AdhocComponentWithVariants).apply {
+            val testTargets = cloche.targets.filter { it.name.startsWith("version:") }
+
+            testTargets.forEach { target ->
+                listOf(
+                    "${target.featureName}ApiElements",
+                    "${target.featureName}RuntimeElements"
+                ).forEach { variantName ->
+                    configurations.findByName(variantName)?.let { config ->
+                        withVariantsFromConfiguration(config) {
+                            skip()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
