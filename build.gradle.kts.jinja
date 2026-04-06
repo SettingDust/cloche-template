@@ -17,7 +17,9 @@ import earth.terrarium.cloche.api.metadata.CommonMetadata
 import earth.terrarium.cloche.api.metadata.FabricMetadata
 import earth.terrarium.cloche.api.target.FabricTarget
 import earth.terrarium.cloche.api.target.ForgeLikeTarget
+import earth.terrarium.cloche.api.target.ForgeTarget
 import earth.terrarium.cloche.api.target.MinecraftTarget
+import earth.terrarium.cloche.api.target.NeoforgeTarget
 import earth.terrarium.cloche.api.target.compilation.ClocheDependencyHandler
 import earth.terrarium.cloche.target.LazyConfigurableInternal
 import earth.terrarium.cloche.tasks.GenerateFabricModJson
@@ -552,9 +554,6 @@ cloche {
             }
         }
 
-        dependencies {
-            fabricApi("0.92.7")
-        }
     }
 
     val fabric211 = fabric("fabric:21.1") {
@@ -572,9 +571,6 @@ cloche {
             }
         }
 
-        dependencies {
-            fabricApi("0.116.10")
-        }
     }
 
     // endregion
@@ -586,7 +582,6 @@ cloche {
         dependsOn(common201)
 
         minecraftVersion = "1.20.1"
-        loaderVersion = "47.4.4"
 
         tasks {
             named(generateModsTomlTaskName) { enabled = false }
@@ -597,7 +592,6 @@ cloche {
         dependsOn(game201)
 
         minecraftVersion = "1.20.1"
-        loaderVersion = "47.4.4"
 
         metadata {
 {% if language == 'kotlin' %}
@@ -668,7 +662,6 @@ cloche {
         dependsOn(common211)
 
         minecraftVersion = "1.21.1"
-        loaderVersion = "21.1.192"
 
         tasks {
             named(generateModsTomlTaskName) { enabled = false }
@@ -679,7 +672,6 @@ cloche {
         dependsOn(game211)
 
         minecraftVersion = "1.21.1"
-        loaderVersion = "21.1.192"
 
         metadata {
 {% if language == 'kotlin' %}
@@ -808,15 +800,7 @@ cloche {
         runs { client() }
 
         dependencies {
-            fabricApi("0.92.6")
             runtimeOnly(container(fabricContainer))
-        }
-
-        tasks {
-            named(generateModsManifestTaskName) { enabled = false }
-            named(jarTaskName) { enabled = false }
-            named(remapJarTaskName) { enabled = false }
-            named(includeJarTaskName) { enabled = false }
         }
     }
 
@@ -826,15 +810,7 @@ cloche {
         runs { client() }
 
         dependencies {
-            fabricApi("0.116.6")
             runtimeOnly(container(fabricContainer))
-        }
-
-        tasks {
-            named(generateModsManifestTaskName) { enabled = false }
-            named(jarTaskName) { enabled = false }
-            named(remapJarTaskName) { enabled = false }
-            named(includeJarTaskName) { enabled = false }
         }
     }
 
@@ -844,7 +820,6 @@ cloche {
 
     forge("version:forge:20.1") {
         minecraftVersion = "1.20.1"
-        loaderVersion = "47.4.4"
 
         runs {
             client {
@@ -855,13 +830,6 @@ cloche {
         dependencies {
             runtimeOnly(container(forgeContainer))
         }
-
-        tasks {
-            named(generateModsManifestTaskName) { enabled = false }
-            named(jarTaskName) { enabled = false }
-            named(remapJarTaskName) { enabled = false }
-            named(includeJarTaskName) { enabled = false }
-        }
     }
 
     // endregion
@@ -870,7 +838,6 @@ cloche {
 
     neoforge("version:neoforge:21.1") {
         minecraftVersion = "1.21.1"
-        loaderVersion = "21.1.192"
 
         runs {
             client {
@@ -881,13 +848,6 @@ cloche {
         dependencies {
             runtimeOnly(container(neoforgeContainer))
         }
-
-        tasks {
-            named(generateModsManifestTaskName) { enabled = false }
-            named(jarTaskName) { enabled = false }
-            named(remapJarTaskName) { enabled = false }
-            named(includeJarTaskName) { enabled = false }
-        }
     }
 
     // endregion
@@ -895,7 +855,7 @@ cloche {
     // region Shared Target Defaults
 
     targets.withType<FabricTarget> {
-        loaderVersion = "0.18.4"
+        loaderVersion = "0.18.6"
 
         includedClient()
 
@@ -933,14 +893,30 @@ cloche {
             }
 {% endif %}
         }
-{% if language == 'kotlin' %}
         dependencies {
+            minecraftVersion.orNull
+                ?.let(String::fabricApiVersion)
+                ?.let(::fabricApi)
+{% if language == 'kotlin' %}
+
             modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
-        }
 {% endif %}
+        }
+    }
+
+    targets.withType<ForgeTarget> {
+        loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
+    }
+
+    targets.withType<NeoforgeTarget> {
+        loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
     }
 
     targets.all {
+        if (name.startsWith("version:")) {
+            disableVersionTemplateTasks()
+        }
+
         runs {
             (client as LazyConfigurableInternal<MinecraftRunConfiguration>).onConfigured {
                 it.jvmArguments(
@@ -953,13 +929,7 @@ cloche {
 
         mappings {
             minecraftVersion.orNull
-                ?.let {
-                    when (it) {
-                        "1.20.1" -> "2023.09.03"
-                        "1.21.1" -> "2024.11.17"
-                        else -> null
-                    }
-                }
+                ?.let(String::parchmentVersion)
                 ?.let(::parchment)
         }
     }
@@ -969,6 +939,37 @@ cloche {
 // endregion
 
 // region Extension Properties
+
+fun String.fabricApiVersion(): String? = when (this) {
+    "1.20.1" -> "0.92.7"
+    "1.21.1" -> "0.116.10"
+    else -> null
+}
+
+fun String.parchmentVersion(): String? = when (this) {
+    "1.20.1" -> "2023.09.03"
+    "1.21.1" -> "2024.11.17"
+    else -> null
+}
+
+fun String.forgeLoaderVersion(): String? = when (this) {
+    "1.20.1" -> "47.4.4"
+    else -> null
+}
+
+fun String.neoForgeLoaderVersion(): String? = when (this) {
+    "1.21.1" -> "21.1.192"
+    else -> null
+}
+
+fun MinecraftTarget.disableVersionTemplateTasks() {
+    tasks {
+        named(generateModsManifestTaskName) { enabled = false }
+        named(jarTaskName) { enabled = false }
+        named(remapJarTaskName) { enabled = false }
+        named(includeJarTaskName) { enabled = false }
+    }
+}
 
 val SourceSet.includeJarTaskName: String
     get() = lowerCamelCaseGradleName(takeUnless(SourceSet::isMain)?.name, "includeJar")
