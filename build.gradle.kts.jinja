@@ -644,11 +644,7 @@ cloche {
 {% endif %}
 {% if has_service %}
 
-            implementation(project(":")) {
-                capabilities {
-                    requireFeature(forgeService.capabilitySuffix!!)
-                }
-            }
+            implementation(target(forgeService))
 {% endif %}
         }
 
@@ -718,11 +714,7 @@ cloche {
 {% endif %}
 {% if has_service %}
 
-            implementation(project(":")) {
-                capabilities {
-                    requireFeature(neoforgeService.capabilitySuffix!!)
-                }
-            }
+            implementation(target(neoforgeService))
 {% endif %}
         }
 
@@ -780,11 +772,7 @@ cloche {
             includeTarget(forgeGame)
 {% if has_service %}
 
-            embed(project(":")) {
-                capabilities {
-                    requireFeature(forgeService.capabilitySuffix!!)
-                }
-            }
+            embed(target(forgeService))
 {% endif %}
         }
     }
@@ -803,11 +791,7 @@ cloche {
             include(catalog.preloadingTricks)
 {% if has_service %}
 
-            embed(project(":")) {
-                capabilities {
-                    requireFeature(neoforgeService.capabilitySuffix!!)
-                }
-            }
+            embed(target(neoforgeService))
 {% endif %}
         }
     }
