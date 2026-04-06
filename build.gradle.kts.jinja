@@ -509,15 +509,22 @@ cloche {
 
     // region Game Targets
 
-    val commonGame = common("game:main") {
-        dependsOn(commonMain)
+    val game = common("game") {
+        // mixins.from(files("src/game/main/resources/$id.game.mixins.json"))
+        // accessWideners.from(file("src/game/main/resources/$id.game.accessWidener"))
+
+        project.dependencies {
+            val api = lowerCamelCaseGradleName(name, JavaPlugin.API_CONFIGURATION_NAME)
+
+            api(target(commonMain))
+        }
     }
 
-    val commonGame201 = common("game:20.1") {
-        dependsOn(commonGame)
+    val game201 = common("game:20.1") {
+        dependsOn(game)
     }
-    val commonGame211 = common("game:21.1") {
-        dependsOn(commonGame)
+    val game211 = common("game:21.1") {
+        dependsOn(game)
     }
 
     // endregion
@@ -530,7 +537,7 @@ cloche {
     }
 
     val fabric201 = fabric("fabric:20.1") {
-        dependsOn(common201, commonGame201, fabricCommon)
+        dependsOn(common201, game201, fabricCommon)
 
         minecraftVersion = "1.20.1"
 
@@ -546,16 +553,12 @@ cloche {
         }
 
         dependencies {
-            fabricApi("0.92.6")
-        }
-
-        tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-            modId = "${id}_20_1"
+            fabricApi("0.92.7")
         }
     }
 
     val fabric211 = fabric("fabric:21.1") {
-        dependsOn(common211, commonGame211, fabricCommon)
+        dependsOn(common211, game211, fabricCommon)
 
         minecraftVersion = "1.21.1"
 
@@ -570,11 +573,7 @@ cloche {
         }
 
         dependencies {
-            fabricApi("0.116.6")
-        }
-
-        tasks.named<GenerateFabricModJson>(generateModsManifestTaskName) {
-            modId = "${id}_21_1"
+            fabricApi("0.116.10")
         }
     }
 
@@ -595,7 +594,7 @@ cloche {
     }
 {% endif %}
     val forgeGame = forge("forge:game") {
-        dependsOn(commonGame201)
+        dependsOn(game201)
 
         minecraftVersion = "1.20.1"
         loaderVersion = "47.4.4"
@@ -681,7 +680,7 @@ cloche {
     }
 {% endif %}
     val neoforgeGame = neoforge("neoforge:game") {
-        dependsOn(commonGame211)
+        dependsOn(game211)
 
         minecraftVersion = "1.21.1"
         loaderVersion = "21.1.192"
