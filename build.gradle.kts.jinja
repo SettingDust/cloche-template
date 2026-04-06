@@ -514,9 +514,9 @@ cloche {
         // accessWideners.from(file("src/game/main/resources/$id.game.accessWidener"))
 
         project.dependencies {
-            val api = lowerCamelCaseGradleName(name, JavaPlugin.API_CONFIGURATION_NAME)
+            val implementation = lowerCamelCaseGradleName(name, JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
 
-            api(target(commonMain))
+            implementation(target(commonMain))
         }
     }
 
