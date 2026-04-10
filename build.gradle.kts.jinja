@@ -35,12 +35,9 @@ import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.jvm.tasks.Jar
 import java.nio.charset.StandardCharsets
 
-// region Plugins
-
 plugins {
     java
     idea
-
 {% if language == 'kotlin' %}
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
@@ -49,8 +46,6 @@ plugins {
     id("com.gradleup.shadow") version "9.4.1"
     id("earth.terrarium.cloche") version "0.18.10-dust.4"
 }
-
-// endregion
 
 // region Project Properties
 
@@ -455,8 +450,6 @@ dependencies {
 
 // endregion
 
-// region Cloche Configuration
-
 cloche {
     // region Metadata & Mappings
 
@@ -529,6 +522,85 @@ cloche {
         dependsOn(game)
     }
 
+    // endregion
+
+    // region Shared Target Defaults
+
+    targets.withType<FabricTarget> {
+        loaderVersion = "0.18.6"
+
+        includedClient()
+
+        metadata {
+            {% if language == 'kotlin' %}
+            entrypoint("main") {
+                adapter = "kotlin"
+                value = "$group.fabric.{{name}}Fabric::init"
+            }
+
+            entrypoint("client") {
+                adapter = "kotlin"
+                value = "$group.fabric.{{name}}Fabric::clientInit"
+            }
+            {% else %}
+            entrypoint("main") {
+                value = "$group.fabric.{{name}}Fabric"
+            }
+
+            entrypoint("client") {
+                value = "$group.fabric.{{name}}FabricClient"
+            }
+            {% endif %}
+
+            dependency {
+                modId = "fabric-api"
+                type = CommonMetadata.Dependency.Type.Required
+            }
+            {% if language == 'kotlin' %}
+            dependency {
+                modId = "fabric-language-kotlin"
+                type = CommonMetadata.Dependency.Type.Required
+            }
+            {% endif %}
+        }
+        dependencies {
+            fabricApi(minecraftVersion.map(String::fabricApiVersion))
+            {% if language == 'kotlin' %}
+
+            modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
+            {% endif %}
+        }
+    }
+
+    targets.withType<ForgeTarget> {
+        loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
+    }
+
+    targets.withType<NeoforgeTarget> {
+        loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+    }
+
+    targets.all {
+        if (name.startsWith("version:")) {
+            disableVersionTemplateTasks()
+        }
+
+        runs {
+            (client as LazyConfigurableInternal<MinecraftRunConfiguration>).onConfigured {
+                it.jvmArguments(
+                    "-Dmixin.debug.verbose=true",
+                    "-Dmixin.debug.export=true",
+                    "-Dclasstransform.dumpClasses=true"
+                )
+            }
+        }
+
+        mappings {
+            minecraftVersion.orNull
+                ?.let(String::parchmentVersion)
+                ?.let(::parchment)
+        }
+    }
     // endregion
 
     // region Main Targets - Fabric
@@ -851,92 +923,7 @@ cloche {
     }
 
     // endregion
-
-    // region Shared Target Defaults
-
-    targets.withType<FabricTarget> {
-        loaderVersion = "0.18.6"
-
-        includedClient()
-
-        dependsOn(fabricCommon)
-
-        metadata {
-{% if language == 'kotlin' %}
-            entrypoint("main") {
-                adapter = "kotlin"
-                value = "$group.fabric.{{name}}Fabric::init"
-            }
-
-            entrypoint("client") {
-                adapter = "kotlin"
-                value = "$group.fabric.{{name}}Fabric::clientInit"
-            }
-{% else %}
-            entrypoint("main") {
-                value = "$group.fabric.{{name}}Fabric"
-            }
-
-            entrypoint("client") {
-                value = "$group.fabric.{{name}}FabricClient"
-            }
-{% endif %}
-
-            dependency {
-                modId = "fabric-api"
-                type = CommonMetadata.Dependency.Type.Required
-            }
-{% if language == 'kotlin' %}
-            dependency {
-                modId = "fabric-language-kotlin"
-                type = CommonMetadata.Dependency.Type.Required
-            }
-{% endif %}
-        }
-        dependencies {
-            minecraftVersion.orNull
-                ?.let(String::fabricApiVersion)
-                ?.let(::fabricApi)
-{% if language == 'kotlin' %}
-
-            modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
-{% endif %}
-        }
-    }
-
-    targets.withType<ForgeTarget> {
-        loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
-    }
-
-    targets.withType<NeoforgeTarget> {
-        loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
-    }
-
-    targets.all {
-        if (name.startsWith("version:")) {
-            disableVersionTemplateTasks()
-        }
-
-        runs {
-            (client as LazyConfigurableInternal<MinecraftRunConfiguration>).onConfigured {
-                it.jvmArguments(
-                    "-Dmixin.debug.verbose=true",
-                    "-Dmixin.debug.export=true",
-                    "-Dclasstransform.dumpClasses=true"
-                )
-            }
-        }
-
-        mappings {
-            minecraftVersion.orNull
-                ?.let(String::parchmentVersion)
-                ?.let(::parchment)
-        }
-    }
-    // endregion
 }
-
-// endregion
 
 // region Extension Properties
 
