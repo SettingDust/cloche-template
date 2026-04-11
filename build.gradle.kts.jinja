@@ -581,7 +581,7 @@ cloche {
     }
 
     targets.all {
-        if (name.startsWith("version:")) {
+        if (isVersionTarget()) {
             disableVersionTemplateTasks()
         }
 
@@ -949,6 +949,8 @@ fun String.neoForgeLoaderVersion(): String? = when (this) {
     else -> null
 }
 
+fun MinecraftTarget.isVersionTarget(): Boolean = name.startsWith("version:")
+
 fun MinecraftTarget.disableVersionTemplateTasks() {
     tasks {
         named(generateModsManifestTaskName) { enabled = false }
@@ -1089,7 +1091,7 @@ tasks {
 
     afterEvaluate {
         (components["java"] as AdhocComponentWithVariants).apply {
-            val testTargets = cloche.targets.filter { it.name.startsWith("version:") }
+            val testTargets = cloche.targets.filter { it.isVersionTarget() }
 
             testTargets.forEach { target ->
                 listOf(
