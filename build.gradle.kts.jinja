@@ -23,6 +23,7 @@ import earth.terrarium.cloche.api.target.NeoforgeTarget
 import earth.terrarium.cloche.api.target.compilation.ClocheDependencyHandler
 import earth.terrarium.cloche.target.LazyConfigurableInternal
 import earth.terrarium.cloche.tasks.GenerateFabricModJson
+import earth.terrarium.cloche.util.fromJars
 import earth.terrarium.cloche.util.target
 import groovy.lang.Closure
 import net.msrandom.minecraftcodev.core.utils.lowerCamelCaseGradleName
@@ -33,6 +34,7 @@ import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.support.serviceOf
 import java.nio.charset.StandardCharsets
 
 plugins {
@@ -235,6 +237,7 @@ class ContainerScope(
                 destinationDirectory = intermediateOutputsDirectory
             }
             input = jarTask.flatMap { it.archiveFile }
+            manifest.fromJars(serviceOf(), input)
             fromResolutionResults(configuration)
         }
 
@@ -245,6 +248,7 @@ class ContainerScope(
                 destinationDirectory = intermediateOutputsDirectory
             }
             input = jarTask.flatMap { it.archiveFile }
+            manifest.fromJars(serviceOf(), input)
             fromResolutionResults(configuration)
         }
     }
@@ -730,7 +734,7 @@ cloche {
 
             dependency {
                 modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Required
+                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
@@ -823,7 +827,7 @@ cloche {
 
             dependency {
                 modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Required
+                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
@@ -880,7 +884,7 @@ cloche {
 
             dependency {
                 modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Required
+                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
@@ -951,6 +955,14 @@ cloche {
 
             embed(target(forgeService))
 {% endif %}
+        }
+
+        jar {
+            manifest {
+                attributes(
+                    "FMLModType" to "GAMELIBRARY"
+                )
+            }
         }
     }
 
