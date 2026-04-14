@@ -966,6 +966,14 @@ cloche {
             embed(target(neoforgeService261))
         {%- endif %}
         }
+
+        jar {
+            manifest {
+                attributes(
+                    "FMLModType" to "GAMELIBRARY"
+                )
+            }
+        }
     }
 
     // endregion
