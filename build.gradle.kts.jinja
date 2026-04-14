@@ -40,10 +40,10 @@ import java.nio.charset.StandardCharsets
 plugins {
     java
     idea
-{% if language == 'kotlin' %}
+{%- if language == 'kotlin' %}
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.serialization") version "2.3.20"
-{% endif %}
+{%- endif %}
     id("com.palantir.git-version") version "5.0.0"
     id("com.gradleup.shadow") version "9.4.1"
     id("earth.terrarium.cloche") version "0.18.11-dust.2"
@@ -512,7 +512,7 @@ cloche {
 
     // region Game Targets
 
-{% if has_service %}
+{%- if has_service %}
     val game = common("game") {
         // mixins.from(files("src/game/main/resources/$id.game.mixins.json"))
         // accessWideners.from(file("src/game/main/resources/$id.game.accessWidener"))
@@ -533,8 +533,7 @@ cloche {
     val game261 = common("game:26.1") {
         dependsOn(game)
     }
-{% endif %}
-
+{%- endif %}
     // endregion
 
     // region Shared Target Defaults
@@ -545,7 +544,7 @@ cloche {
         includedClient()
 
         metadata {
-            {% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             entrypoint("main") {
                 adapter = "kotlin"
                 value = "$group.fabric.{{name}}Fabric::init"
@@ -555,7 +554,7 @@ cloche {
                 adapter = "kotlin"
                 value = "$group.fabric.{{name}}Fabric::clientInit"
             }
-            {% else %}
+        {%- else %}
             entrypoint("main") {
                 value = "$group.fabric.{{name}}Fabric"
             }
@@ -563,25 +562,23 @@ cloche {
             entrypoint("client") {
                 value = "$group.fabric.{{name}}FabricClient"
             }
-            {% endif %}
-
+        {%- endif %}
             dependency {
                 modId = "fabric-api"
                 type = CommonMetadata.Dependency.Type.Required
             }
-            {% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             dependency {
                 modId = "fabric-language-kotlin"
                 type = CommonMetadata.Dependency.Type.Required
             }
-            {% endif %}
+        {%- endif %}
         }
         dependencies {
             fabricApi(minecraftVersion.map(String::fabricApiVersion))
-            {% if language == 'kotlin' %}
-
-            modImplementation("net.fabricmc:fabric-language-kotlin:1.13.10+kotlin.2.3.20")
-            {% endif %}
+        {%- if language == 'kotlin' %}
+            modImplementation(catalog.fabric.language.kotlin)
+        {%- endif %}
         }
     }
 
@@ -624,12 +621,11 @@ cloche {
     }
 
     val fabric201 = fabric("fabric:20.1") {
-    {% if has_service %}
+    {%- if has_service %}
         dependsOn(common201, game201, fabricCommon)
-    {% else %}
+    {%- else %}
         dependsOn(common201, fabricCommon)
-    {% endif %}
-
+    {%- endif %}
         minecraftVersion = "1.20.1"
 
         metadata {
@@ -646,12 +642,11 @@ cloche {
     }
 
     val fabric211 = fabric("fabric:21.1") {
-    {% if has_service %}
+    {%- if has_service %}
         dependsOn(common211, game211, fabricCommon)
-    {% else %}
+    {%- else %}
         dependsOn(common211, fabricCommon)
-    {% endif %}
-
+    {%- endif %}
         minecraftVersion = "1.21.1"
 
         metadata {
@@ -667,12 +662,11 @@ cloche {
     }
 
     val fabric261 = fabric("fabric:26.1") {
-{% if has_service %}
+{%- if has_service %}
         dependsOn(common261, game261, fabricCommon)
-{% else %}
+{%- else %}
         dependsOn(common261, fabricCommon)
-{% endif %}
-
+{%- endif %}
         minecraftVersion = "26.1.2"
 
         metadata {
@@ -689,8 +683,8 @@ cloche {
     // endregion
 
     // region Main Targets - Forge
+{%- if has_service %}
 
-{% if has_service %}
     val forgeService = forge("forge:service") {
         dependsOn(common201)
 
@@ -700,29 +694,27 @@ cloche {
             named(generateModsTomlTaskName) { enabled = false }
         }
     }
-{% endif %}
+{%- endif %}
     val forgeGame = forge("forge:game") {
-{% if has_service %}
-    dependsOn(game201)
-{% else %}
-    dependsOn(common201)
-{% endif %}
-
+    {%- if has_service %}
+        dependsOn(game201)
+    {%- else %}
+        dependsOn(common201)
+    {%- endif %}
         minecraftVersion = "1.20.1"
 
         metadata {
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modLoader = "klf"
             loaderVersion {
                 start = "1"
             }
-{% else %}
+        {%- else %}
             modLoader = "javafml"
             loaderVersion {
                 start = "47"
             }
-{% endif %}
-
+        {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
@@ -750,13 +742,12 @@ cloche {
             implementation("org.spongepowered:mixin:0.8.7")
             compileOnly(catalog.mixinextras.common)
             implementation(catalog.mixinextras.forge)
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modImplementation(catalog.klf.mc20.forge)
-{% endif %}
-{% if has_service %}
-
+        {%- endif %}
+        {%- if has_service %}
             implementation(target(forgeService))
-{% endif %}
+        {%- endif %}
         }
 
         tasks {
@@ -773,8 +764,8 @@ cloche {
     // endregion
 
     // region Main Targets - NeoForge
+{%- if has_service %}
 
-{% if has_service %}
     val neoforgeService = neoforge("neoforge:service") {
         dependsOn(common211)
 
@@ -794,29 +785,27 @@ cloche {
             named(generateModsTomlTaskName) { enabled = false }
         }
     }
-{% endif %}
+{%- endif %}
     val neoforgeGame = neoforge("neoforge:game") {
-{% if has_service %}
+    {%- if has_service %}
         dependsOn(game211)
-{% else %}
+    {%- else %}
         dependsOn(common211)
-{% endif %}
-
+    {%- endif %}
         minecraftVersion = "1.21.1"
 
         metadata {
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modLoader = "klf"
             loaderVersion {
                 start = "1"
             }
-{% else %}
+        {%- else %}
             modLoader = "javafml"
             loaderVersion {
                 start = "4"
             }
-{% endif %}
-
+        {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
@@ -832,13 +821,12 @@ cloche {
         }
 
         dependencies {
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modImplementation(catalog.klf.mc21.neoforge)
-{% endif %}
-{% if has_service %}
-
+        {%- endif %}
+        {%- if has_service %}
             implementation(target(neoforgeService))
-{% endif %}
+        {%- endif %}
         }
 
         tasks {
@@ -853,27 +841,25 @@ cloche {
     }
 
     val neoforgeGame261 = neoforge("neoforge:game:26.1") {
-{% if has_service %}
+    {%- if has_service %}
         dependsOn(game261)
-{% else %}
+    {%- else %}
         dependsOn(common261)
-{% endif %}
-
+    {%- endif %}
         minecraftVersion = "26.1.2"
 
         metadata {
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modLoader = "klf"
             loaderVersion {
                 start = "1"
             }
-{% else %}
+        {%- else %}
             modLoader = "javafml"
             loaderVersion {
                 start = "4"
             }
-{% endif %}
-
+        {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
@@ -889,13 +875,12 @@ cloche {
         }
 
         dependencies {
-{% if language == 'kotlin' %}
+        {%- if language == 'kotlin' %}
             modImplementation(catalog.klf.mc26.neoforge)
-{% endif %}
-{% if has_service %}
-
+        {%- endif %}
+        {%- if has_service %}
             implementation(target(neoforgeService261))
-{% endif %}
+        {%- endif %}
         }
 
         tasks {
@@ -946,15 +931,14 @@ cloche {
     // region Forge Container
 
     val forgeContainer = container(loader = MinecraftModLoader.forge) {
-{% if has_service %}
+    {%- if has_service %}
         embed()
-{% endif %}
+    {%- endif %}
         dependencies {
             includeTarget(forgeGame)
-{% if has_service %}
-
+        {%- if has_service %}
             embed(target(forgeService))
-{% endif %}
+        {%- endif %}
         }
 
         jar {
@@ -971,17 +955,16 @@ cloche {
     // region NeoForge Container
 
     val neoforgeContainer = container(loader = MinecraftModLoader.neoforge) {
-{% if has_service %}
+    {%- if has_service %}
         embed()
-{% endif %}
+    {%- endif %}
         dependencies {
             includeTarget(neoforgeGame)
             includeTarget(neoforgeGame261)
-{% if has_service %}
-
+        {%- if has_service %}
             embed(target(neoforgeService))
             embed(target(neoforgeService261))
-{% endif %}
+        {%- endif %}
         }
     }
 
