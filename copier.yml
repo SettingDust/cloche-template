@@ -84,5 +84,6 @@ _exclude:
   - "AI_CONTEXT.md"
   - "{% if not has_service %}src/forge/service{% endif %}"
   - "{% if not has_service %}src/neoforge/service{% endif %}"
+  - "{% if not has_service %}src/game{% endif %}"
   - "{% if language == 'java' %}**/main/kotlin{% endif %}"
   - "{% if language == 'kotlin' %}**/main/java{% endif %}"
