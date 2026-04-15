@@ -179,7 +179,9 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
             loader("neoforge") { version(VersionFormatter.plusLoader) }
         }
     }
-{% endif %}
+
+    library("fabric-language-kotlin", "net.fabricmc","fabric-language-kotlin").version("1.13.10+kotlin.2.3.20")
+    {% endif %}
 }
 
 // #endregion
