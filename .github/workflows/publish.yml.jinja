@@ -7,31 +7,29 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
-          cache: 'gradle'
+          java-version: 25
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-read-only: false
+        uses: gradle/actions/setup-gradle@v6
 
-      - uses: burrunan/gradle-cache-action@v3
-        name: Execute Gradle build
-        with:
-          arguments: build
-
-      - name: Get CHANGELOG
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@v6
+      - name: Execute Gradle build
+        run: gradle build
 
       - name: Git Status
         run: |
           git status --porcelain
           ./gradlew printVersion
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
 
       - name: Upload bundled jar
         uses: Kir-Antipov/mc-publish@v3.3.0
@@ -72,11 +70,7 @@ jobs:
           java: |
             17
             21
-
-      - name: Update CHANGELOG
-        uses: mikepenz/release-changelog-builder-action@v6
-        with:
-          outputFile: CHANGELOG.MD
+            25
 
       - name: Commit CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v7
