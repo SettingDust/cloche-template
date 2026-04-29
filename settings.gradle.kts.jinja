@@ -143,13 +143,13 @@ fun VersionCatalogBuilder.modrinth(id: String, block: MultiVersionDepBuilder.() 
 
 dependencyResolutionManagement.versionCatalogs.create("catalog") {
     library("mixin-fabric", "net.fabricmc", "sponge-mixin")
-        .version("0.17.0+mixin.0.8.7")
+        .version("0.17.3+mixin.0.8.7")
 
     dependency("mixinextras", "io.github.llamalad7") {
         artifact = "mixinextras"
 
         version("*") {
-            modVersion = "0.5.0"
+            modVersion = "0.5.4"
             loader("forge") { artifact(ArtifactFormatter.dashLoader) }
             loader("fabric") { artifact(ArtifactFormatter.dashLoader) }
             loader("common") { artifact(ArtifactFormatter.dashLoader) }
@@ -157,12 +157,12 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
     }
 
     library("preloadingTricks", "settingdust.preloading_tricks", "PreloadingTricks")
-        .version("3.4.6")
+        .version("3.5.10-3-g4c663c2")
 
 {% if language == 'kotlin' %}
     dependency("klf", "dev.nyon") {
         artifact = "KotlinLangForge"
-        versionFormat = { _, ver -> "2.11.2-k2.3.20-$ver" }
+        versionFormat = { _, ver -> "2.11.2-k2.3.21-$ver" }
 
         version("20") {
             modVersion = "2.0"
@@ -170,7 +170,7 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
         }
 
         version("21") {
-            modVersion = "3.1"
+            modVersion = "3.0"
             loader("neoforge") { version(VersionFormatter.plusLoader) }
         }
 
@@ -180,7 +180,7 @@ dependencyResolutionManagement.versionCatalogs.create("catalog") {
         }
     }
 
-    library("fabric-language-kotlin", "net.fabricmc","fabric-language-kotlin").version("1.13.10+kotlin.2.3.20")
+    library("fabric-language-kotlin", "net.fabricmc","fabric-language-kotlin").version("1.13.11+kotlin.2.3.21")
     {% endif %}
 }
 
