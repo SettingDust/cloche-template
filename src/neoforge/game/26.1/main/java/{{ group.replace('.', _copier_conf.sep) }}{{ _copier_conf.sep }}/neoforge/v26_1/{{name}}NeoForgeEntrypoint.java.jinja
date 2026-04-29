@@ -1,0 +1,14 @@
+package {{group}}.neoforge.v26_1;
+
+import {{group}}.util.Entrypoint;
+import {{group}}.util.MinecraftVersion;
+
+public class {{name}}NeoForgeEntrypoint implements Entrypoint {
+    public {{name}}NeoForgeEntrypoint() {
+        MinecraftVersion.V261.requireCurrent();
+    }
+
+    @Override
+    public void onConstruct() {
+    }
+}

@@ -1,6 +1,6 @@
 package {{group}}.neoforge
 
-import net.neoforged.bus.api.IEventBus
+import dev.nyon.klf.MOD_BUS
 import net.neoforged.fml.common.Mod
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
@@ -8,11 +8,11 @@ import {{group}}.{{name}}
 import {{group}}.util.Entrypoint
 
 @Mod({{name}}.ID)
-class {{name}}NeoForge(modBus: IEventBus) {
+object {{name}}NeoForge {
     init {
         requireNotNull({{name}})
         Entrypoint.construct()
-        modBus.apply {
+        MOD_BUS.apply {
             addListener<FMLCommonSetupEvent> {
                 Entrypoint.init()
             }

@@ -1,0 +1,16 @@
+package {{group}}.neoforge.v26_1
+
+import dev.nyon.klf.MOD_BUS
+import {{group}}.util.Entrypoint
+import {{group}}.util.MinecraftVersion
+
+class {{name}}NeoForgeEntrypoint : Entrypoint {
+    init {
+        MinecraftVersion.V261.requireCurrent()
+        @Suppress("RedundantRequireNotNullCall")
+        requireNotNull(MOD_BUS)
+    }
+
+    override fun construct() {
+    }
+}

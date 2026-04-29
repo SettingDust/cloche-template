@@ -1,17 +1,16 @@
 package {{group}}.neoforge.util;
 
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.LoadingModList;
 import {{group}}.util.LoaderAdapter;
 
 public class LoaderAdapter implements LoaderAdapter {
     @Override
     public boolean isClient() {
-        return FMLLoader.getDist().isClient();
+        return NeoForgeAdapter.getInstance().getDist().isClient();
     }
 
     @Override
     public boolean isModLoaded(String modId) {
-        return ModList.get().isLoaded(modId);
+        return LoadingModList.get().getModFileById(modId) != null;
     }
 }
