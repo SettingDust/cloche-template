@@ -1,0 +1,16 @@
+package {{group}}.v21_1.util;
+
+import net.minecraft.resources.ResourceLocation;
+import {{group}}.util.Identifier;
+
+public final class IdentifierUtil {
+    private IdentifierUtil() {}
+
+    public static ResourceLocation toNative(Identifier identifier) {
+        return ResourceLocation.fromNamespaceAndPath(identifier.namespace(), identifier.path());
+    }
+
+    public static Identifier toCommon(ResourceLocation location) {
+        return new Identifier(location.getNamespace(), location.getPath());
+    }
+}

@@ -1,9 +1,8 @@
 package {{group}};
 
-import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import {{group}}.util.MinecraftAdapter;
+import {{group}}.util.Identifier;
 
 public final class {{name}} {
     public static final String ID = "{{id}}";
@@ -11,7 +10,7 @@ public final class {{name}} {
 
     private {{name}}() {}
 
-    public static ResourceLocation id(String path) {
-        return MinecraftAdapter.getInstance().id(ID, path);
+    public static Identifier id(String path) {
+        return new Identifier(ID, path);
     }
 }

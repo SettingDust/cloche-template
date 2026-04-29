@@ -1,0 +1,47 @@
+package {{group}}.util;
+
+import java.util.Objects;
+
+public final class Identifier {
+    private final String namespace;
+    private final String path;
+
+    public Identifier(String namespace, String path) {
+        this.namespace = Objects.requireNonNull(namespace, "namespace");
+        this.path = Objects.requireNonNull(path, "path");
+    }
+
+    public String namespace() {
+        return namespace;
+    }
+
+    public String path() {
+        return path;
+    }
+
+    public static Identifier parse(String value) {
+        int separator = value.indexOf(':');
+        if (separator == -1) {
+            return new Identifier("minecraft", value);
+        }
+        return new Identifier(value.substring(0, separator), value.substring(separator + 1));
+    }
+
+    @Override
+    public String toString() {
+        return namespace + ":" + path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Identifier)) return false;
+        Identifier that = (Identifier) o;
+        return namespace.equals(that.namespace) && path.equals(that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(namespace, path);
+    }
+}

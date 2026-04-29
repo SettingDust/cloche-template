@@ -1,10 +1,9 @@
 package {{group}}.v21_1.util;
 
-import net.minecraft.resources.ResourceLocation;
+import {{group}}.util.MinecraftVersion;
 
 public class MinecraftAdapter implements {{group}}.util.MinecraftAdapter {
-    @Override
-    public ResourceLocation id(String namespace, String path) {
-        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+    public MinecraftAdapter() {
+        MinecraftVersion.V1211.requireCurrent();
     }
 }

@@ -1,0 +1,13 @@
+package {{group}}.v26_1.util;
+
+public final class IdentifierUtil {
+    private IdentifierUtil() {}
+
+    public static net.minecraft.resources.Identifier toNative({{group}}.util.Identifier identifier) {
+        return net.minecraft.resources.Identifier.fromNamespaceAndPath(identifier.namespace(), identifier.path());
+    }
+
+    public static {{group}}.util.Identifier toCommon(net.minecraft.resources.Identifier location) {
+        return new {{group}}.util.Identifier(location.getNamespace(), location.getPath());
+    }
+}

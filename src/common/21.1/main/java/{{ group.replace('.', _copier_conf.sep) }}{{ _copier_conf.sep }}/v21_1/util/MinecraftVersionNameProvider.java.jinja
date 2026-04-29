@@ -1,0 +1,11 @@
+package {{group}}.v21_1.util;
+
+import net.minecraft.SharedConstants;
+import {{group}}.util.MinecraftVersionNameProvider;
+
+public class MinecraftVersionNameProvider implements {{group}}.util.MinecraftVersionNameProvider {
+    @Override
+    public String currentVersionName() {
+        return SharedConstants.getCurrentVersion().getName();
+    }
+}

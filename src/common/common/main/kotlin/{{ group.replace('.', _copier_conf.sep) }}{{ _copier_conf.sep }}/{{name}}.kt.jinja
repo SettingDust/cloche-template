@@ -1,7 +1,7 @@
 package {{group}}
 
 import org.apache.logging.log4j.LogManager
-import {{group}}.util.MinecraftAdapter
+import {{group}}.util.Identifier
 import {{group}}.util.ServiceLoaderUtil
 
 object {{name}} {
@@ -9,5 +9,5 @@ object {{name}} {
 
     val LOGGER = LogManager.getLogger()
 
-    fun id(path: String) = MinecraftAdapter.id(ID, path)
+    fun id(path: String) = Identifier(ID, path)
 }

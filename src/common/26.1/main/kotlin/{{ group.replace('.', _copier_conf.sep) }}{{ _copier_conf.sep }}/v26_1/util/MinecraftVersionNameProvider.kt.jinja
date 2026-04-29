@@ -1,0 +1,8 @@
+package {{group}}.v26_1.util
+
+import net.minecraft.SharedConstants
+import {{group}}.util.MinecraftVersionNameProvider
+
+class MinecraftVersionNameProvider : MinecraftVersionNameProvider {
+    override fun currentVersionName(): String = SharedConstants.getCurrentVersion().name()
+}
