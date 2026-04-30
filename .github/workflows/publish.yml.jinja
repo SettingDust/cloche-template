@@ -28,8 +28,8 @@ jobs:
         id: changelog
         uses: requarks/changelog-action@v1
         with:
-          token: ${{ github.token }}
-          tag: ${{ github.ref_name }}
+          token: ${{ '{{' }} github.token }}
+          tag: ${{ '{{' }} github.ref_name }}
 
       - name: Upload bundled jar
         uses: Kir-Antipov/mc-publish@v3.3.0
