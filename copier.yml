@@ -74,6 +74,7 @@ _tasks:
     - "git update-index --chmod=+x ./gradlew"
 
 _exclude:
+  - "AGENTS.md"
   - "copier.yaml"
   - "copier.yml"
   - "~*"
@@ -81,7 +82,6 @@ _exclude:
   - ".DS_Store"
   - "README.md"
   - ".idea"
-  - "AI_CONTEXT.md"
   - "{% if not has_service %}src/forge/service{% endif %}"
   - "{% if not has_service %}src/neoforge/service{% endif %}"
   - "{% if not has_service %}src/game{% endif %}"
