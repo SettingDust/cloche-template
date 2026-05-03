@@ -1131,6 +1131,10 @@ cloche {
             }
         }
 
+        configurations.named(lowerCamelCaseGradleName(featureName, "legacyClasspath")) {
+            exclude("org.jetbrains.kotlin")
+        }
+
         dependencies {
             modRuntimeOnly(project(":")) {
                 isTransitive = false
@@ -1139,6 +1143,8 @@ cloche {
             legacyClasspath(catalog.preloadingTricks) {
                 isTransitive = false
             }
+
+            legacyClasspath(catalog.klf.mc20.forge)
         }
     }
 
@@ -1163,6 +1169,8 @@ cloche {
             legacyClasspath(catalog.preloadingTricks) {
                 isTransitive = false
             }
+
+            legacyClasspath(catalog.klf.mc21.neoforge)
         }
     }
 
@@ -1183,6 +1191,8 @@ cloche {
             legacyClasspath(catalog.preloadingTricks) {
                 isTransitive = false
             }
+
+            legacyClasspath(catalog.klf.mc26.neoforge)
         }
     }
 
