@@ -49,7 +49,7 @@ plugins {
     {%- endif %}
     id("com.palantir.git-version") version "5.0.0"
     id("com.gradleup.shadow") version "9.4.1"
-    id("earth.terrarium.cloche") version "0.18.11-dust.8"
+    id("earth.terrarium.cloche") version "0.18.11-dust.16"
 }
 
 // region Project Properties
@@ -731,13 +731,6 @@ cloche {
                 modId = "preloading_tricks"
                 type = CommonMetadata.Dependency.Type.Recommended
             }
-
-            {%- if language == 'kotlin' %}
-            dependency {
-                modId = "klf"
-                type = CommonMetadata.Dependency.Type.Required
-            }
-            {%- endif %}
         }
 
         repositories {
@@ -835,13 +828,6 @@ cloche {
                 modId = "preloading_tricks"
                 type = CommonMetadata.Dependency.Type.Recommended
             }
-
-            {%- if language == 'kotlin' %}
-            dependency {
-                modId = "klf"
-                type = CommonMetadata.Dependency.Type.Required
-            }
-            {%- endif %}
         }
 
         dependencies {
