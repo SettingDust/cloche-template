@@ -2,7 +2,7 @@ package {{group}};
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import {{group}}.util.Identifier;
+import {{group}}.util.CommonIdentifier;
 
 public final class {{name}} {
     public static final String ID = "{{id}}";
@@ -10,7 +10,7 @@ public final class {{name}} {
 
     private {{name}}() {}
 
-    public static Identifier id(String path) {
-        return new Identifier(ID, path);
+    public static CommonIdentifier id(String path) {
+        return CommonIdentifier.of(ID, path);
     }
 }
