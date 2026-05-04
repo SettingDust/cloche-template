@@ -3,7 +3,6 @@ package {{group}}.v26_1.util;
 import net.minecraft.resources.Identifier;
 import {{group}}.util.CommonIdentifier;
 import {{group}}.util.MinecraftVersion;
-import {{group}}.util.SimpleIdentifier;
 
 public class IdentifierFactory implements {{group}}.util.IdentifierFactory {
     public IdentifierFactory() {
@@ -12,12 +11,11 @@ public class IdentifierFactory implements {{group}}.util.IdentifierFactory {
 
     @Override
     public CommonIdentifier create(String namespace, String path) {
-        return new SimpleIdentifier(namespace, path);
+        return (CommonIdentifier) (Object) Identifier.fromNamespaceAndPath(namespace, path);
     }
 
     @Override
     public CommonIdentifier parse(String value) {
-        Identifier id = Identifier.parse(value);
-        return new SimpleIdentifier(id.getNamespace(), id.getPath());
+        return (CommonIdentifier) (Object) Identifier.parse(value);
     }
 }

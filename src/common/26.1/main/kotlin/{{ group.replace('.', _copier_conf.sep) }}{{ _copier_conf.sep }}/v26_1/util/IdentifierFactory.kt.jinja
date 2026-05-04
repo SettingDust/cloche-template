@@ -4,18 +4,17 @@ import net.minecraft.resources.Identifier
 import {{group}}.util.CommonIdentifier
 import {{group}}.util.IdentifierFactory
 import {{group}}.util.MinecraftVersion
-import {{group}}.util.SimpleIdentifier
 
 class IdentifierFactory : IdentifierFactory {
     init {
         MinecraftVersion.V261.requireCurrent()
     }
 
+    @Suppress("USELESS_CAST")
     override fun create(namespace: String, path: String): CommonIdentifier =
-        SimpleIdentifier(namespace, path)
+        Identifier.fromNamespaceAndPath(namespace, path) as CommonIdentifier
 
-    override fun parse(value: String): CommonIdentifier {
-        val native = Identifier.parse(value)
-        return SimpleIdentifier(native.namespace, native.path)
-    }
+    @Suppress("USELESS_CAST")
+    override fun parse(value: String): CommonIdentifier =
+        Identifier.parse(value) as CommonIdentifier
 }

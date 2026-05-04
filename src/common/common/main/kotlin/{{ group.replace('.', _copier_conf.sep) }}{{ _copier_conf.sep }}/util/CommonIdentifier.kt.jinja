@@ -2,7 +2,7 @@ package {{group}}.util
 
 /**
  * Common interface for resource identifiers across MC versions.
- * Can be extended with Mixin injection into MC's native ResourceLocation/Identifier classes.
+ * Injected into MC's ResourceLocation (1.20.1/1.21.1) and Identifier (26.1) via Mixin.
  */
 interface CommonIdentifier {
     val namespace: String
@@ -15,11 +15,4 @@ interface CommonIdentifier {
         fun parse(value: String): CommonIdentifier =
             IdentifierFactory.parse(value)
     }
-}
-
-data class SimpleIdentifier(
-    override val namespace: String,
-    override val path: String,
-) : CommonIdentifier {
-    override fun toString(): String = "$namespace:$path"
 }
