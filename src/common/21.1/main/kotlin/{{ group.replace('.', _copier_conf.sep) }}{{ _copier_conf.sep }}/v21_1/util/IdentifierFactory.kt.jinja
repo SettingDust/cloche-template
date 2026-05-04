@@ -1,0 +1,21 @@
+package {{group}}.v21_1.util
+
+import net.minecraft.resources.ResourceLocation
+import {{group}}.util.CommonIdentifier
+import {{group}}.util.IdentifierFactory
+import {{group}}.util.MinecraftVersion
+import {{group}}.util.SimpleIdentifier
+
+class IdentifierFactory : IdentifierFactory {
+    init {
+        MinecraftVersion.V1211.requireCurrent()
+    }
+
+    override fun create(namespace: String, path: String): CommonIdentifier =
+        SimpleIdentifier(namespace, path)
+
+    override fun parse(value: String): CommonIdentifier {
+        val native = ResourceLocation.parse(value)
+        return SimpleIdentifier(native.namespace, native.path)
+    }
+}

@@ -1,0 +1,15 @@
+package {{group}}.util;
+
+import java.util.Objects;
+
+public record SimpleIdentifier(String namespace, String path) implements CommonIdentifier {
+    public SimpleIdentifier {
+        Objects.requireNonNull(namespace, "namespace");
+        Objects.requireNonNull(path, "path");
+    }
+
+    @Override
+    public String toString() {
+        return namespace + ":" + path;
+    }
+}

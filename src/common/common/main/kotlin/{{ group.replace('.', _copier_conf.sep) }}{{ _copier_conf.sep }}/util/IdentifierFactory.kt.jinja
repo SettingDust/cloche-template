@@ -1,0 +1,14 @@
+package {{group}}.util
+
+/**
+ * SPI interface for creating [CommonIdentifier] instances.
+ * Each MC version provides a factory that delegates to the native
+ * ResourceLocation / Identifier constructor.
+ */
+interface IdentifierFactory {
+    companion object : IdentifierFactory by ServiceLoaderUtil.findService()
+
+    fun create(namespace: String, path: String): CommonIdentifier
+
+    fun parse(value: String): CommonIdentifier
+}

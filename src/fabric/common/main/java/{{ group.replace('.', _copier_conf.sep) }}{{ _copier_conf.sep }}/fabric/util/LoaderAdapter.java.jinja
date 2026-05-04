@@ -11,6 +11,11 @@ public class LoaderAdapter implements LoaderAdapter {
     }
 
     @Override
+    public java.nio.file.Path gameDir() {
+        return FabricLoader.getInstance().getGameDir();
+    }
+
+    @Override
     public boolean isModLoaded(String modId) {
         return FabricLoader.getInstance().isModLoaded(modId);
     }
