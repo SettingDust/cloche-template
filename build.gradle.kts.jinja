@@ -546,6 +546,15 @@ cloche {
 
         includedClient()
 
+        dependencies {
+            fabricApi(minecraftVersion.map(String::fabricApiVersion))
+            {%- if language == 'kotlin' %}
+            modImplementation(catalog.fabric.language.kotlin)
+            {%- endif %}
+        }
+
+        if (isVersionTarget()) return@withType
+
         metadata {
             {%- if language == 'kotlin' %}
             entrypoint("main") {
@@ -577,12 +586,6 @@ cloche {
             }
             {%- endif %}
         }
-        dependencies {
-            fabricApi(minecraftVersion.map(String::fabricApiVersion))
-            {%- if language == 'kotlin' %}
-            modImplementation(catalog.fabric.language.kotlin)
-            {%- endif %}
-        }
     }
 
     targets.withType<ForgeTarget> {
@@ -591,6 +594,27 @@ cloche {
 
     targets.withType<NeoforgeTarget> {
         loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+
+        if (isVersionTarget()) return@withType
+
+        metadata {
+            {%- if language == 'kotlin' %}
+            modLoader = "klf"
+            loaderVersion {
+                start = "1"
+            }
+            {%- else %}
+            modLoader = "javafml"
+            loaderVersion {
+                start = "4"
+            }
+            {%- endif %}
+
+            dependency {
+                modId = "preloading_tricks"
+                type = CommonMetadata.Dependency.Type.Recommended
+            }
+        }
     }
 
     targets.all {
@@ -805,28 +829,12 @@ cloche {
         minecraftVersion = "1.21.1"
 
         metadata {
-            {%- if language == 'kotlin' %}
-            modLoader = "klf"
-            loaderVersion {
-                start = "1"
-            }
-            {%- else %}
-            modLoader = "javafml"
-            loaderVersion {
-                start = "4"
-            }
-            {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
                 version {
                     start = "1.21"
                 }
-            }
-
-            dependency {
-                modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
@@ -859,28 +867,12 @@ cloche {
         minecraftVersion = "26.1.2"
 
         metadata {
-            {%- if language == 'kotlin' %}
-            modLoader = "klf"
-            loaderVersion {
-                start = "1"
-            }
-            {%- else %}
-            modLoader = "javafml"
-            loaderVersion {
-                start = "4"
-            }
-            {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
                 version {
                     start = "26.1"
                 }
-            }
-
-            dependency {
-                modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
