@@ -967,7 +967,7 @@ cloche {
             destinationDirectory = intermediateOutputsDirectory
             configurations = emptyList()
 
-            for (target in listOf(neoforgeGame261, neoforgeGame211)) {
+            for (target in listOf(neoforgeGame211, neoforgeGame261)) {
                 val output = tasks.named<Jar>(target.includeJarTaskName).flatMap { it.archiveFile }
                 from(project.zipTree(output))
 
@@ -976,7 +976,8 @@ cloche {
 
             mergeServiceFiles()
             append("META-INF/accesstransformer.cfg")
-            transform(PreserveFirstFoundResourceTransformer::class.java)
+            transform<PreserveFirstFoundResourceTransformer>()
+            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
         }
 
         val neoforgeMergedDevJar = tasks.register<ShadowJar>(lowerCamelCaseGradleName(featureName, "mergedDevJar")) {
@@ -985,7 +986,7 @@ cloche {
             destinationDirectory = intermediateOutputsDirectory
             configurations = emptyList()
 
-            for (target in listOf(neoforgeGame261, neoforgeGame211)) {
+            for (target in listOf(neoforgeGame211, neoforgeGame261)) {
                 val output = tasks.named<Jar>(target.jarTaskName).flatMap { it.archiveFile }
                 from(project.zipTree(output))
 
@@ -994,7 +995,8 @@ cloche {
 
             mergeServiceFiles()
             append("META-INF/accesstransformer.cfg")
-            transform(PreserveFirstFoundResourceTransformer::class.java)
+            transform<PreserveFirstFoundResourceTransformer>()
+            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
         }
 
         val mergedRuntimeElements =
@@ -1242,6 +1244,7 @@ cloche {
 
             transform<ForgeMetadataTransformer>()
             transform<PreserveFirstFoundResourceTransformer>()
+            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
         }
 
         val shadowMergedJar by registering(ShadowJar::class) {
@@ -1260,6 +1263,7 @@ cloche {
 
             transform<ForgeMetadataTransformer>()
             transform<PreserveFirstFoundResourceTransformer>()
+            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
         }
 
         val shadowSourcesJar by registering(ShadowJar::class) {
