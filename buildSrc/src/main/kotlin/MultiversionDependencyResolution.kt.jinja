@@ -1,0 +1,27 @@
+import earth.terrarium.cloche.api.attributes.MinecraftModLoader
+import earth.terrarium.cloche.api.target.FabricTarget
+import earth.terrarium.cloche.api.target.ForgeTarget
+import earth.terrarium.cloche.api.target.MinecraftTarget
+import earth.terrarium.cloche.api.target.NeoforgeTarget
+import earth.terrarium.cloche.api.target.compilation.ClocheDependencyHandler
+import org.gradle.api.artifacts.dsl.DependencyCollector
+
+fun MinecraftTarget.multiversionLoader(): MinecraftModLoader = when (this) {
+    is FabricTarget -> MinecraftModLoader.fabric
+    is ForgeTarget -> MinecraftModLoader.forge
+    is NeoforgeTarget -> MinecraftModLoader.neoforge
+    else -> MinecraftModLoader.common
+}
+
+context(MinecraftTarget)
+fun ClocheDependencyHandler.modImplementation(spec: MultiversionDependencySpec) {
+    val dependency = spec
+        .resolve(multiversionLoader(), minecraftVersionEnum())
+        .toDependency(project)
+    modImplementation(dependency)
+}
+
+context(MinecraftTarget)
+fun DependencyCollector.modImplementation(spec: MultiversionDependencySpec) {
+    add(spec.resolve(multiversionLoader(), minecraftVersionEnum()).toDependency(project))
+}

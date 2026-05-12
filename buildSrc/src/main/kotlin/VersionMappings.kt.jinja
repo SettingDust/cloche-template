@@ -30,6 +30,12 @@ fun String.neoForgeLoaderVersion(): String? = when (this) {
     else -> null
 }
 
+fun String.toMinecraftVersionEnum(): MinecraftVersion = MinecraftVersion.fromValue(this)
+
+fun MinecraftTarget.minecraftVersionEnum(): MinecraftVersion =
+    minecraftVersion.orNull?.toMinecraftVersionEnum()
+        ?: error("Target $name does not declare a minecraftVersion")
+
 fun MinecraftTarget.isVersionTarget(): Boolean = name.startsWith("version:")
 
 fun MinecraftTarget.disableVersionTemplateTasks(project: Project) {
