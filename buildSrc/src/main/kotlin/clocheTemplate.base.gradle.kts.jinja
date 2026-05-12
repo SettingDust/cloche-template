@@ -1,0 +1,69 @@
+plugins {
+    java
+    idea
+    id("com.palantir.git-version")
+    id("com.gradleup.shadow")
+    id("earth.terrarium.cloche")
+}
+
+val archive_name: String by rootProject.properties
+val gitVersion: groovy.lang.Closure<String> by extra
+
+group = "{{ group }}"
+version = gitVersion()
+
+base { archivesName = archive_name }
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven("https://api.modrinth.com/maven")
+        }
+        filter {
+            includeGroup("maven.modrinth")
+        }
+    }
+
+    maven("https://repo.nyon.dev/releases") {
+        content {
+            includeGroup("dev.nyon")
+        }
+    }
+
+    maven("https://maven.lenni0451.net/snapshots/") {
+        content {
+            includeGroupAndSubgroups("net.lenni0451")
+        }
+    }
+
+    maven("https://maven.su5ed.dev/releases") {
+        content {
+            includeGroupAndSubgroups("dev.su5ed.sinytra")
+            includeGroupAndSubgroups("org.sinytra")
+        }
+    }
+
+    maven("https://maven.sinytra.org/") {
+        content {
+            includeGroupAndSubgroups("org.sinytra")
+        }
+    }
+
+    maven("https://raw.githubusercontent.com/settingdust/maven/main/repository/") {
+        name = "SettingDust's Maven"
+    }
+
+    mavenCentral()
+
+    cloche {
+        librariesMinecraft()
+        main()
+        mavenFabric()
+        mavenForge()
+        mavenNeoforged()
+        mavenNeoforgedMeta()
+        mavenParchment()
+    }
+
+    mavenLocal()
+}

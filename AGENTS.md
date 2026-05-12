@@ -11,7 +11,7 @@ This is a **Copier template** for generating multi-loader Minecraft mod projects
 - **Language choice**: Supports both Kotlin and Java
 - **Gradle-based**: Uses modern Gradle with version catalogs and Cloche build framework
 - **Template-driven**: Jinja2 templates with dynamic project generation
-- **Optional service layer**: Configurable Forge/NeoForge service-side code generation
+- **Optional bootstrap layer**: Configurable Forge/NeoForge bootstrap-side code generation
 
 ### Tech Stack
 
@@ -50,7 +50,7 @@ When running `copier copy`, you'll be prompted for:
 | `author` | str | Author name | `SettingDust` | (any string) |
 | `group` | str | Maven group ID (Java package) | `{{ author \| lower }}.{{ id }}` | Must start with letter, followed by alphanumeric/underscore/dot |
 | `license` | str | License type | `Apache License 2.0` | (any string) |
-| `has_service` | bool | Enable Forge/NeoForge service targets | `false` | true/false |
+| `has_service` | bool | Enable Forge/NeoForge bootstrap targets | `false` | true/false |
 | `language` | str | Source code language | `kotlin` | `kotlin` or `java` |
 
 ### Post-Generation Tasks
@@ -85,8 +85,8 @@ Files ending in `.jinja` are processed by Copier during generation. Common templ
 The `_exclude` list in copier.yml controls which folders/files are pruned after rendering:
 
 - **Language-based**: If language == `java`, all `**/main/kotlin` folders are excluded
-- **Feature-based**: If has_service == `false`, `src/forge/service` and `src/neoforge/service` are excluded
-- **Always excluded**: `copier.yml`, `README.md`, `.idea`, `.git`, `AI_CONTEXT.md`
+- **Feature-based**: If has_service == `false`, `src/forge/bootstrap` and `src/neoforge/bootstrap` are excluded
+- **Always excluded**: `copier.yml`, `README.md`, `.idea`, `.git`, `docs`, `plans`, `AI_CONTEXT.md`
 
 ### Important Template Variables in Generated Code
 
@@ -97,7 +97,7 @@ The `_exclude` list in copier.yml controls which folders/files are pruned after 
 - `{{author}}`: Author name
 - `{{description}}`: Mod description
 - `{{language}}`: `kotlin` or `java`
-- `{{has_service}}`: boolean for service-side code generation
+- `{{has_service}}`: boolean for bootstrap-side code generation
 - `_copier_conf.sep`: Path separator (/ on Unix, \ on Windows)
 
 ## Generated Project Structure
@@ -106,6 +106,11 @@ After running `copier copy`, the generated project follows this structure:
 
 ```
 {project}/
+├── buildSrc/
+│   ├── build.gradle.kts                    # build logic dependencies and precompiled plugins
+│   └── src/
+│       └── main/
+│           └── kotlin/                    # extracted build logic helpers and convention plugins
 ├── gradle/
 │   └── wrapper/
 │       └── gradle-wrapper.properties      # Gradle version specification
@@ -115,15 +120,15 @@ After running `copier copy`, the generated project follows this structure:
 │   │   ├── 21.1/main/                     # MC 1.21 specific
 │   │   ├── 26.1/main/                     # MC 1.26 specific
 │   │   ├── common/main/                   # Version-agnostic shared code
-│   │   └── game/                          # Game-only shared overlays
+│   │   └── minecraft/                     # Minecraft-only shared overlays
 │   ├── fabric/common/main/                # Fabric-specific common code
 │   ├── forge/
-│   │   ├── game/main/                     # Forge game-side code
-│   │   └── service/main/                  # Forge service-side code (if has_service=true)
+│   │   ├── minecraft/main/                # Forge minecraft-side code
+│   │   └── bootstrap/main/                # Forge bootstrap-side code (if has_service=true)
 │   ├── neoforge/
-│   │   ├── game/main/                     # NeoForge game-side code
-│   │   └── service/main/                  # NeoForge service-side code (if has_service=true)
-│   └── game/                              # Cross-loader game layer
+│   │   ├── minecraft/main/                # NeoForge minecraft-side code
+│   │   └── bootstrap/main/                # NeoForge bootstrap-side code (if has_service=true)
+│   └── minecraft/                         # Cross-loader minecraft layer
 │       ├── 20.1/main/
 │       ├── 21.1/main/
 │       └── main/
@@ -212,7 +217,7 @@ When modifying the template itself:
 
 #### Adding a New Minecraft Version
 
-1. Create new versioned directories: `src/common/X.X/main/` and `src/game/X.X/main/`
+1. Create new versioned directories: `src/common/X.X/main/` and `src/minecraft/X.X/main/`
 2. Update README or copier.yml if version list is documented
 3. Ensure gradle configuration auto-discovers new versions
 
@@ -304,7 +309,7 @@ cd /tmp/test_java_min && ./gradlew build
 - **Shared code**: `src/common/` (loader-independent, all versions)
 - **Version-specific shared**: `src/common/{version}/` (MC-version-specific, all loaders)
 - **Loader-specific**: `src/{loader}/` (all versions, loader-specific)
-- **Game/Server split**: Use `game/` for game-side, `service/` for server-side (if has_service=true)
+- **Minecraft/Bootstrap split**: Use `minecraft/` for runtime-side code, `bootstrap/` for pre-launch loader-side code (if has_service=true)
 
 ## Important Concepts for Agents
 

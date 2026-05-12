@@ -1,0 +1,100 @@
+import earth.terrarium.cloche.api.metadata.CommonMetadata
+import earth.terrarium.cloche.api.target.FabricTarget
+import earth.terrarium.cloche.api.target.ForgeLikeTarget
+import earth.terrarium.cloche.api.target.ForgeTarget
+import earth.terrarium.cloche.api.target.MinecraftTarget
+import earth.terrarium.cloche.api.target.NeoforgeTarget
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.named
+
+fun MinecraftTarget.commonDefaults(project: Project) {
+    if (isVersionTarget()) {
+        disableVersionTemplateTasks(project)
+    }
+
+    runs {
+        client {
+            jvmArguments(
+                "-Dmixin.debug.verbose=true",
+                "-Dmixin.debug.export=true",
+                "-Dclasstransform.dumpClasses=true"
+            )
+        }
+    }
+
+    mappings {
+        minecraftVersion.orNull
+            ?.let(String::parchmentVersion)
+            ?.let(::parchment)
+    }
+}
+
+fun FabricTarget.fabricDefaults(project: Project) {
+    loaderVersion.set("0.19.2")
+    includedClient()
+
+    dependencies {
+        fabricApi(minecraftVersion.map(String::fabricApiVersion))
+    }
+
+    if (isVersionTarget()) return
+
+    metadata {
+        {%- if language == 'kotlin' %}
+        entrypoint("main") {
+            adapter.set("kotlin")
+            value.set("${project.group}.fabric.{{name}}Fabric::init")
+        }
+
+        entrypoint("client") {
+            adapter.set("kotlin")
+            value.set("${project.group}.fabric.{{name}}Fabric::clientInit")
+        }
+        {%- else %}
+        entrypoint("main", "${project.group}.fabric.{{name}}Fabric")
+        entrypoint("client", "${project.group}.fabric.{{name}}FabricClient")
+        {%- endif %}
+
+        dependency {
+            modId.set("fabric-api")
+            type.set(CommonMetadata.Dependency.Type.Required)
+        }
+
+        {%- if language == 'kotlin' %}
+        dependency {
+            modId.set("fabric-language-kotlin")
+            type.set(CommonMetadata.Dependency.Type.Required)
+        }
+        {%- endif %}
+    }
+}
+
+fun ForgeTarget.forgeDefaults() {
+    loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
+}
+
+fun NeoforgeTarget.neoforgeDefaults() {
+    loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+
+    if (isVersionTarget()) return
+
+    metadata {
+        {%- if language == 'kotlin' %}
+        modLoader.set("klf")
+        loaderVersion("1")
+        {%- else %}
+        modLoader.set("javafml")
+        loaderVersion("4")
+        {%- endif %}
+
+        dependency {
+            modId.set("preloading_tricks")
+            type.set(CommonMetadata.Dependency.Type.Recommended)
+        }
+    }
+}
+
+fun ForgeLikeTarget.bootstrapDefaults(project: Project, minecraftVersion: String) {
+    this.minecraftVersion.set(minecraftVersion)
+    project.tasks.named(generateModsTomlTaskName) { enabled = false }
+}

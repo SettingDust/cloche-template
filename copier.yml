@@ -54,7 +54,7 @@ license:
 
 has_service:
   type: bool
-  help: Whether to create service targets for forge/neoforge (shared platform code separated from game code).
+  help: Whether to create bootstrap targets for forge/neoforge (shared platform code separated from minecraft code).
   default: false
 
 language:
@@ -80,10 +80,12 @@ _exclude:
   - "~*"
   - ".git"
   - ".DS_Store"
+  - "docs"
+  - "plans"
   - "README.md"
   - ".idea"
-  - "{% if not has_service %}src/forge/service{% endif %}"
-  - "{% if not has_service %}src/neoforge/service{% endif %}"
-  - "{% if not has_service %}src/game{% endif %}"
-  - "{% if language == 'java' %}**/main/kotlin{% endif %}"
-  - "{% if language == 'kotlin' %}**/main/java{% endif %}"
+  - "{% if not has_service %}src/forge/bootstrap{% endif %}"
+  - "{% if not has_service %}src/neoforge/bootstrap{% endif %}"
+  - "{% if not has_service %}src/minecraft{% endif %}"
+  - "{% if language == 'java' %}src/**/main/kotlin{% endif %}"
+  - "{% if language == 'kotlin' %}src/**/main/java{% endif %}"
