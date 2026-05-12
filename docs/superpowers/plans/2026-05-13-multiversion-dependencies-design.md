@@ -2,7 +2,7 @@
 
 **Goal:** Replace the current settings-side multi-version dependency catalog DSL with a single buildSrc-hosted, strongly typed dependency registry that can resolve dependency variants from a `MinecraftTarget` context.
 
-**Architecture:** Add a `multiversionDependencies` registry in generated `buildSrc` backed by a `NamedDomainObjectContainer<MultiversionDependencySpec>`. Use delegated registration syntax such as `val MultiversionDependencies.mixinextras by multiversionDependencies.modrinth(...) { ... }`. Keep source-specific defaults at the spec root, express variant selection through a single `resolve { loader, mcVersion -> ... }` lambda, and bridge resolved variants to Gradle `Dependency` objects from a `Project` context.
+**Architecture:** Add a `multiversionDependencies` registry in generated `buildSrc` backed by a `NamedDomainObjectContainer<MultiversionDependencySpec>`. Use delegated registration syntax such as `val MultiversionDependencies.mixinextras by multiversionDependencies.modrinth(...) { ... }`. Keep source-specific defaults at the spec root, express variant selection through a single `resolve { loader, mcVersion -> ... }` lambda, allow the resolver patch to override `group`, `artifact`, and `version`, and bridge resolved variants to Gradle `Dependency` objects from a `Project` context.
 
 **Tech Stack:** Copier template, Gradle Kotlin DSL, buildSrc Kotlin sources, Cloche `MinecraftTarget`, Gradle dependency APIs
 
@@ -103,6 +103,8 @@ First-iteration fields:
 - `artifact: String`
 - `version: String`
 
+The resolved model must allow all three fields to differ from the default spec root values. This is required for real cases where different MC-version variants change repository coordinates, such as a dependency whose `group` changes between supported target versions.
+
 The resolved variant provides a conversion function in `Project` context, for example:
 
 ```kotlin
@@ -176,6 +178,8 @@ Examples:
 - Maven default coordinate: `group + artifact + version`
 - Modrinth default coordinate: `artifact + version`
 
+The root values are defaults, not invariants. A resolver patch may override any of `group`, `artifact`, or `version` when a target-specific coordinate differs.
+
 ### `resolve` is the only variant-selection entry point
 
 Variant selection is expressed through one optional resolver:
@@ -198,8 +202,11 @@ It returns a `variant(...)` patch relative to the default variant.
 `variant(...)` returns an override patch.
 
 - `variant()` with no arguments means “use default values unchanged”
+- `variant(group = "...")` means “override only group”
 - `variant(artifact = "...")` means “override only artifact”
 - `variant(version = "...")` means “override only version”
+
+Multiple fields may be overridden together when a target-specific dependency changes more than one coordinate component.
 
 If no `resolve` block exists, resolution returns the default variant directly.
 
@@ -218,6 +225,8 @@ This avoids adding a second parallel DSL for version formatting and keeps `resol
 Reusable helpers are especially appropriate for Modrinth version strings such as:
 
 - `"version-loader,mcVersion"`
+
+They are also appropriate for Maven-side cases where the selected MC version changes the published `group` or artifact name.
 
 ---
 
@@ -268,6 +277,8 @@ Validation performed when the spec is configured:
 - Maven specs require `group`, `artifact`, and `version`
 - Modrinth specs require `artifact` and `version`
 - Override patches must not contain invalid empty required values
+
+Resolver patches may override `group`, `artifact`, and `version`, but any resulting coordinate must still be complete after defaults and overrides are merged.
 
 ### Resolution-time validation
 
