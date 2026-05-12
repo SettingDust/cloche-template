@@ -77,6 +77,8 @@ _exclude:
   - "AGENTS.md"
   - "copier.yaml"
   - "copier.yml"
+  - "scripts/test-buildsrc-presets.ps1"
+  - "scripts/test-minecraft-version-provider.ps1"
   - "~*"
   - ".git"
   - ".DS_Store"

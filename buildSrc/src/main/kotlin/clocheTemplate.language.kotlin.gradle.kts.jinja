@@ -1,4 +1,49 @@
+import earth.terrarium.cloche.api.metadata.CommonMetadata
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+}
+
+val modName = providers.gradleProperty("name").get()
+
+clocheTemplatePresetConventions {
+    fabric {
+        if (!isVersionTarget()) {
+            metadata {
+                entrypoint("main") {
+                    adapter.set("kotlin")
+                    value.set("${project.group}.fabric.${modName}Fabric::init")
+                }
+
+                entrypoint("client") {
+                    adapter.set("kotlin")
+                    value.set("${project.group}.fabric.${modName}Fabric::clientInit")
+                }
+
+                dependency {
+                    modId.set("fabric-language-kotlin")
+                    type.set(CommonMetadata.Dependency.Type.Required)
+                }
+            }
+        }
+    }
+
+    forge {
+        if (!isVersionTarget()) {
+            metadata {
+                modLoader.set("klf")
+                loaderVersion("1")
+            }
+        }
+    }
+
+    neoforge {
+        if (!isVersionTarget()) {
+            metadata {
+                modLoader.set("klf")
+                loaderVersion("1")
+            }
+        }
+    }
 }

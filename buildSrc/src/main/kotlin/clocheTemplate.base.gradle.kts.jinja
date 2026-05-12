@@ -14,6 +14,8 @@ val gitVersion: Closure<String> by extra
 group = "{{ group }}"
 version = gitVersion()
 
+createClocheTemplatePresetConventions()
+
 base { archivesName = archive_name }
 
 repositories {

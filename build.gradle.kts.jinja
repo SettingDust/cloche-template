@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage", "INVISIBLE_REFERENCE")
+@file:Suppress("UnstableApiUsage")
 
 import com.github.jengelman.gradle.plugins.shadow.ShadowJavaPlugin.Companion.shadowRuntimeElements
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -148,11 +148,11 @@ cloche {
     }
 
     targets.withType<ForgeTarget> {
-        forgeDefaults()
+        forgeDefaults(project)
     }
 
     targets.withType<NeoforgeTarget> {
-        neoforgeDefaults()
+        neoforgeDefaults(project)
     }
 
     targets.all {
@@ -234,7 +234,8 @@ cloche {
 
     val forgeBootstrap = forge("forge:bootstrap") {
         dependsOn(common201)
-        bootstrapDefaults(project, "1.20.1")
+        minecraftVersion = "1.20.1"
+        bootstrapDefaults(project)
     }
     {%- endif %}
     val forgeMinecraft = forge("forge:minecraft") {
@@ -246,17 +247,6 @@ cloche {
         minecraftVersion = "1.20.1"
 
         metadata {
-            {%- if language == 'kotlin' %}
-            modLoader = "klf"
-            loaderVersion {
-                start = "1"
-            }
-            {%- else %}
-            modLoader = "javafml"
-            loaderVersion {
-                start = "47"
-            }
-            {%- endif %}
             dependency {
                 modId = "minecraft"
                 type = CommonMetadata.Dependency.Type.Required
@@ -264,11 +254,6 @@ cloche {
                     start = "1.20.1"
                     end = "1.21"
                 }
-            }
-
-            dependency {
-                modId = "preloading_tricks"
-                type = CommonMetadata.Dependency.Type.Recommended
             }
         }
 
@@ -310,12 +295,14 @@ cloche {
 
     val neoforgeBootstrap = neoforge("neoforge:bootstrap") {
         dependsOn(common211)
-        bootstrapDefaults(project, "1.21.1")
+        minecraftVersion = "1.21.1"
+        bootstrapDefaults(project)
     }
 
     val neoforgeBootstrap261 = neoforge("neoforge:bootstrap:26.1") {
         dependsOn(common261)
-        bootstrapDefaults(project, "26.1.2")
+        minecraftVersion = "26.1.2"
+        bootstrapDefaults(project)
     }
     {%- endif %}
 

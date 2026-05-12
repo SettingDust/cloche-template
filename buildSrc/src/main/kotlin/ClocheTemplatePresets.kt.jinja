@@ -37,56 +37,26 @@ fun FabricTarget.fabricDefaults(project: Project) {
         fabricApi(minecraftVersion.map(String::fabricApiVersion))
     }
 
+    project.clocheTemplatePresetConventions.applyFabric(this)
+
     if (isVersionTarget()) return
 
     metadata {
-        {%- if language == 'kotlin' %}
-        entrypoint("main") {
-            adapter.set("kotlin")
-            value.set("${project.group}.fabric.{{name}}Fabric::init")
-        }
-
-        entrypoint("client") {
-            adapter.set("kotlin")
-            value.set("${project.group}.fabric.{{name}}Fabric::clientInit")
-        }
-        {%- else %}
-        entrypoint("main", "${project.group}.fabric.{{name}}Fabric")
-        entrypoint("client", "${project.group}.fabric.{{name}}FabricClient")
-        {%- endif %}
-
         dependency {
             modId.set("fabric-api")
             type.set(CommonMetadata.Dependency.Type.Required)
         }
-
-        {%- if language == 'kotlin' %}
-        dependency {
-            modId.set("fabric-language-kotlin")
-            type.set(CommonMetadata.Dependency.Type.Required)
-        }
-        {%- endif %}
     }
 }
 
-fun ForgeTarget.forgeDefaults() {
+fun ForgeTarget.forgeDefaults(project: Project) {
     loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
-}
 
-fun NeoforgeTarget.neoforgeDefaults() {
-    loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+    project.clocheTemplatePresetConventions.applyForge(this)
 
     if (isVersionTarget()) return
 
     metadata {
-        {%- if language == 'kotlin' %}
-        modLoader.set("klf")
-        loaderVersion("1")
-        {%- else %}
-        modLoader.set("javafml")
-        loaderVersion("4")
-        {%- endif %}
-
         dependency {
             modId.set("preloading_tricks")
             type.set(CommonMetadata.Dependency.Type.Recommended)
@@ -94,7 +64,21 @@ fun NeoforgeTarget.neoforgeDefaults() {
     }
 }
 
-fun ForgeLikeTarget.bootstrapDefaults(project: Project, minecraftVersion: String) {
-    this.minecraftVersion.set(minecraftVersion)
+fun NeoforgeTarget.neoforgeDefaults(project: Project) {
+    loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+
+    project.clocheTemplatePresetConventions.applyNeoforge(this)
+
+    if (isVersionTarget()) return
+
+    metadata {
+        dependency {
+            modId.set("preloading_tricks")
+            type.set(CommonMetadata.Dependency.Type.Recommended)
+        }
+    }
+}
+
+fun ForgeLikeTarget.bootstrapDefaults(project: Project) {
     project.tasks.named(generateModsTomlTaskName) { enabled = false }
 }
