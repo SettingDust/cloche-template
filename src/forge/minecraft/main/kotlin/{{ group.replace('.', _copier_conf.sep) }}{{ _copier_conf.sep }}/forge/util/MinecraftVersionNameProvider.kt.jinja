@@ -1,0 +1,9 @@
+package {{group}}.forge.util
+
+import net.minecraftforge.fml.loading.LoadingModList
+
+class MinecraftVersionNameProvider : {{group}}.util.MinecraftVersionNameProvider {
+    override fun currentVersionName(): String = LoadingModList.get()
+        .getModFileById("minecraft")
+        .versionString()
+}

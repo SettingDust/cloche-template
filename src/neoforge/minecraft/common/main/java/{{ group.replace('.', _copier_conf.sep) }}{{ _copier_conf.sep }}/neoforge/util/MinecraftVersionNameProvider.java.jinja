@@ -1,0 +1,12 @@
+package {{group}}.neoforge.util;
+
+import net.neoforged.fml.loading.LoadingModList;
+
+public class MinecraftVersionNameProvider implements {{group}}.util.MinecraftVersionNameProvider {
+    @Override
+    public String currentVersionName() {
+        return LoadingModList.get()
+            .getModFileById("minecraft")
+            .versionString();
+    }
+}

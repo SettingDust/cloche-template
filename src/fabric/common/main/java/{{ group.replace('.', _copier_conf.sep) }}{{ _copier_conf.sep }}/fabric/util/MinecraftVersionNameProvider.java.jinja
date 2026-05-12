@@ -1,0 +1,15 @@
+package {{group}}.fabric.util;
+
+import net.fabricmc.loader.api.FabricLoader;
+
+public class MinecraftVersionNameProvider implements {{group}}.util.MinecraftVersionNameProvider {
+    @Override
+    public String currentVersionName() {
+        return FabricLoader.getInstance()
+            .getModContainer("minecraft")
+            .orElseThrow()
+            .getMetadata()
+            .getVersion()
+            .getFriendlyString();
+    }
+}

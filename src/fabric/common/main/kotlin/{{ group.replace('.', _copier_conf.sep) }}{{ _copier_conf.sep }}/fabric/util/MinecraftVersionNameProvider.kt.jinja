@@ -1,0 +1,12 @@
+package {{group}}.fabric.util
+
+import net.fabricmc.loader.api.FabricLoader
+
+class MinecraftVersionNameProvider : {{group}}.util.MinecraftVersionNameProvider {
+    override fun currentVersionName(): String = FabricLoader.getInstance()
+        .getModContainer("minecraft")
+        .orElseThrow()
+        .metadata
+        .version
+        .friendlyString
+}
