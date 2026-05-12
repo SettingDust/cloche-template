@@ -1,8 +1,8 @@
 # Multiversion Dependencies Design
 
-**Goal:** Replace the current settings-side multi-version dependency catalog DSL with a single buildSrc-hosted, strongly typed dependency registry that can resolve dependency variants from a `MinecraftTarget` context.
+**Goal:** Replace the current settings-side multi-version dependency catalog DSL with a single strongly typed dependency registry implementation in `buildSrc` that can be declared from the root build script or an applied auxiliary script and can resolve dependency variants from a `MinecraftTarget` context.
 
-**Architecture:** Add a `multiversionDependencies` registry in generated `buildSrc` backed by a `NamedDomainObjectContainer<MultiversionDependencySpec>`. Use delegated registration syntax such as `val MultiversionDependencies.mixinextras by multiversionDependencies.modrinth(...) { ... }`. Keep source-specific defaults at the spec root, express variant selection through a single `resolve { loader, mcVersion -> ... }` lambda, allow the resolver patch to override `group`, `artifact`, and `version`, and bridge resolved variants to Gradle `Dependency` objects from a `Project` context.
+**Architecture:** Add a `multiversionDependencies` registry implementation in generated `buildSrc` backed by a `NamedDomainObjectContainer<MultiversionDependencySpec>`, then declare actual dependencies from the root build script or a dedicated applied script. Use delegated registration syntax such as `val MultiversionDependencies.mixinextras by multiversionDependencies.modrinth(...) { ... }`. Keep source-specific defaults at the spec root, express variant selection through a single `resolve { loader, mcVersion -> ... }` lambda, allow the resolver patch to override `group`, `artifact`, and `version`, and bridge resolved variants to Gradle `Dependency` objects from a `Project` context.
 
 **Tech Stack:** Copier template, Gradle Kotlin DSL, buildSrc Kotlin sources, Cloche `MinecraftTarget`, Gradle dependency APIs
 
@@ -10,7 +10,7 @@
 
 ## Goals
 
-- Keep the dependency rules in `buildSrc`, not in `settings.gradle.kts.jinja`.
+- Keep the dependency registry implementation in `buildSrc`, but declare dependency rules from the main build script or an applied auxiliary script, not in `settings.gradle.kts.jinja`.
 - Preserve strong typing and code completion for declared multi-version dependencies.
 - Allow plain Maven dependencies and Modrinth Maven dependencies under one consistent model.
 - Resolve dependency variants from `MinecraftTarget` using only loader and Minecraft version.
@@ -30,7 +30,7 @@
 
 ### `MultiversionDependencies`
 
-`MultiversionDependencies` is the top-level registry exposed from `buildSrc`.
+`MultiversionDependencies` is the top-level registry type implemented in `buildSrc` and instantiated for use from the main build script or an applied auxiliary script.
 
 - Backed by `NamedDomainObjectContainer<MultiversionDependencySpec>`.
 - Owns delegated registration entry points:
@@ -47,7 +47,7 @@ val MultiversionDependencies.mixinextras by multiversionDependencies.modrinth(
 }
 ```
 
-The property declaration is both the accessor definition and the registration site. The design does not attempt to auto-generate arbitrary accessors from registration names.
+The property declaration is both the accessor definition and the registration site. The design does not attempt to auto-generate arbitrary accessors from registration names. These property declarations live in the root build script or an applied helper script, not inside `buildSrc` source files.
 
 ### `MultiversionDependencySpec`
 
@@ -330,7 +330,7 @@ The design intentionally avoids a one-shot full migration.
 
 ## Open Constraints Confirmed In Design
 
-- The registry remains in `buildSrc` only.
+- The registry implementation lives in `buildSrc`, while dependency declarations live in the root build script or an applied helper script.
 - The design does not depend on settings plugins or version-catalog code generation.
 - Delegated registration is the primary registration style.
 - The spec root holds default variant fields.
