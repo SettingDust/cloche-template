@@ -1,0 +1,48 @@
+import kotlin.properties.PropertyDelegateProvider
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
+
+private class RegisteredSpecDelegate(
+    private val container: MultiversionDependencies,
+    private val configure: MultiversionDependencySpec.() -> Unit,
+) : ReadOnlyProperty<MultiversionDependencies, MultiversionDependencySpec> {
+    private var cached: MultiversionDependencySpec? = null
+
+    override fun getValue(
+        thisRef: MultiversionDependencies,
+        property: KProperty<*>,
+    ): MultiversionDependencySpec {
+        return cached ?: container.maybeCreate(property.name).apply(configure).also { cached = it }
+    }
+}
+
+fun MultiversionDependencies.maven(
+    group: String,
+    artifact: String,
+    version: String,
+    action: (MultiversionDependencySpec.() -> Unit)? = null,
+): PropertyDelegateProvider<MultiversionDependencies, ReadOnlyProperty<MultiversionDependencies, MultiversionDependencySpec>> =
+    PropertyDelegateProvider { thisRef, _ ->
+        RegisteredSpecDelegate(thisRef) {
+            sourceKind = DependencySourceKind.MAVEN
+            this.group = group
+            this.artifact = artifact
+            this.version = version
+            action?.invoke(this)
+        }
+    }
+
+fun MultiversionDependencies.modrinth(
+    artifact: String,
+    version: String,
+    action: (MultiversionDependencySpec.() -> Unit)? = null,
+): PropertyDelegateProvider<MultiversionDependencies, ReadOnlyProperty<MultiversionDependencies, MultiversionDependencySpec>> =
+    PropertyDelegateProvider { thisRef, _ ->
+        RegisteredSpecDelegate(thisRef) {
+            sourceKind = DependencySourceKind.MODRINTH
+            group = "maven.modrinth"
+            this.artifact = artifact
+            this.version = version
+            action?.invoke(this)
+        }
+    }

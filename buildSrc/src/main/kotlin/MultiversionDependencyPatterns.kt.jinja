@@ -1,0 +1,11 @@
+import earth.terrarium.cloche.api.attributes.MinecraftModLoader
+
+fun loaderArtifactOverrides(vararg artifacts: Pair<MinecraftModLoader, String>): MultiversionResolver = { loader, _ ->
+    artifacts.firstOrNull { it.first == loader }
+        ?.let { VariantOverride(artifact = VariantField.Set(it.second)) }
+        ?: VariantOverride()
+}
+
+fun versionLoaderMcVersionPattern(version: String): MultiversionResolver = { loader, mcVersion ->
+    VariantOverride(version = VariantField.Set("$version-${loader.name.lowercase()},${mcVersion.value}"))
+}
