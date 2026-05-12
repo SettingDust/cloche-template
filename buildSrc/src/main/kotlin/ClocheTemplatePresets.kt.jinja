@@ -52,6 +52,14 @@ fun FabricTarget.fabricDefaults(project: Project) {
 fun ForgeTarget.forgeDefaults(project: Project) {
     loaderVersion.set(minecraftVersion.map(String::forgeLoaderVersion))
 
+    if (isVersionTarget()) {
+        runs {
+            client {
+                env("MOD_CLASSES", "")
+            }
+        }
+    }
+
     project.clocheTemplatePresetConventions.applyForge(this)
 
     if (isVersionTarget()) return
@@ -66,6 +74,14 @@ fun ForgeTarget.forgeDefaults(project: Project) {
 
 fun NeoforgeTarget.neoforgeDefaults(project: Project) {
     loaderVersion.set(minecraftVersion.map(String::neoForgeLoaderVersion))
+
+    if (isVersionTarget()) {
+        runs {
+            client {
+                env("MOD_CLASSES", "")
+            }
+        }
+    }
 
     project.clocheTemplatePresetConventions.applyNeoforge(this)
 

@@ -21,7 +21,6 @@ import earth.terrarium.cloche.api.target.ForgeLikeTarget
 import earth.terrarium.cloche.api.target.ForgeTarget
 import earth.terrarium.cloche.api.target.MinecraftTarget
 import earth.terrarium.cloche.api.target.NeoforgeTarget
-import earth.terrarium.cloche.target.LazyConfigurableInternal
 import earth.terrarium.cloche.tasks.GenerateFabricModJson
 import earth.terrarium.cloche.util.fromJars
 import earth.terrarium.cloche.util.target
@@ -83,7 +82,7 @@ cloche {
 
     // region Common Targets
 
-    common()
+    common {}
 
     val commonMain = common("common:common") {
         // mixins.from(file("src/common/common/main/resources/$id.mixins.json"))
@@ -597,12 +596,6 @@ cloche {
     forge("version:forge:20.1") {
         minecraftVersion = "1.20.1"
 
-        runs {
-            client {
-                env("MOD_CLASSES", "")
-            }
-        }
-
         configurations.named(lowerCamelCaseGradleName(featureName, "legacyClasspath")) {
             exclude("org.jetbrains.kotlin")
         }
@@ -629,12 +622,6 @@ cloche {
     neoforge("version:neoforge:21.1") {
         minecraftVersion = "1.21.1"
 
-        runs {
-            client {
-                env("MOD_CLASSES", "")
-            }
-        }
-
         dependencies {
             modRuntimeOnly(project(":")) {
                 isTransitive = false
@@ -652,12 +639,6 @@ cloche {
 
     neoforge("version:neoforge:26.1") {
         minecraftVersion = "26.1.2"
-
-        runs {
-            client {
-                env("MOD_CLASSES", "")
-            }
-        }
 
         dependencies {
             modRuntimeOnly(project(":")) {
@@ -679,165 +660,10 @@ cloche {
     // endregion
 
     // region Final Jar
-    tasks {
-        withType<ProcessResources> {
-            duplicatesStrategy = DuplicatesStrategy.WARN
-        }
-
-        withType<Jar> {
-            duplicatesStrategy = DuplicatesStrategy.WARN
-        }
-
-        shadowJar {
-            enabled = false
-        }
-
-        class ForgeMetadataTransformer : ResourceTransformer {
-            private val gson = GsonBuilder().setPrettyPrinting().create()
-            private val collected = JsonArray()
-            private val path = "META-INF/jarjar/metadata.json"
-            private var transformed = false
-
-            override fun canTransformResource(element: FileTreeElement): Boolean {
-                return element.path == path
-            }
-
-            override fun transform(context: TransformerContext) {
-                context.inputStream.use { input ->
-                    val json = gson.fromJson(input.reader(Charsets.UTF_8), JsonObject::class.java)
-                    val jars = json.getAsJsonArray("jars")
-                    jars?.forEach { collected.add(it) }
-                    transformed = true
-                }
-            }
-
-            override fun hasTransformedResource(): Boolean = transformed
-
-            override fun modifyOutputStream(os: ZipOutputStream, preserveFileTimestamps: Boolean) {
-                if (collected.size() == 0) return
-
-                val merged = JsonObject().apply {
-                    add("jars", collected)
-                }
-
-                os.putNextEntry(ZipEntry(path))
-                os.write(gson.toJson(merged).toByteArray(StandardCharsets.UTF_8))
-                os.closeEntry()
-            }
-        }
-
-        val shadowMergedDevJar by registering(ShadowJar::class) {
-            archiveClassifier = "dev"
-            configurations = emptyList()
-
-            for (container in listOf(fabricContainer, forgeContainer, neoforgeContainer)) {
-                val output = container.includeDevJarTask.flatMap { it.archiveFile }
-                from(project.zipTree(output))
-
-                manifest.fromJars(serviceOf(), output)
-            }
-
-            mergeServiceFiles()
-            append("META-INF/accesstransformer.cfg")
-
-            transform<ForgeMetadataTransformer>()
-            transform<PreserveFirstFoundResourceTransformer>()
-            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-        }
-
-        val shadowMergedJar by registering(ShadowJar::class) {
-            archiveClassifier = ""
-            configurations = emptyList()
-
-            for (container in listOf(fabricContainer, forgeContainer, neoforgeContainer)) {
-                val output = container.includeJarTask.flatMap { it.archiveFile }
-                from(project.zipTree(output))
-
-                manifest.fromJars(serviceOf(), output)
-            }
-
-            mergeServiceFiles()
-            append("META-INF/accesstransformer.cfg")
-
-            transform<ForgeMetadataTransformer>()
-            transform<PreserveFirstFoundResourceTransformer>()
-            filesMatching("**/*.class") { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-        }
-
-        val shadowSourcesJar by registering(ShadowJar::class) {
-            dependsOn(cloche.targets.map { it.generateModsManifestTaskName })
-
-            mergeServiceFiles()
-            archiveClassifier.set("sources")
-            from(sourceSets.map { it.allSource })
-
-            doFirst {
-                manifest {
-                    from(source.filter { it.name.equals("MANIFEST.MF") }.toList())
-                }
-            }
-        }
-
-        build {
-            dependsOn(shadowMergedDevJar, shadowMergedJar, shadowSourcesJar)
-        }
-
-        jar {
-            enabled = false
-        }
-
-        afterEvaluate {
-            (components["java"] as AdhocComponentWithVariants).apply {
-                configurations {
-                    shadowRuntimeElements {
-                        // Shadow plugin registers an extra shadowRuntimeElements variant.
-                        // Keep it out of published metadata to avoid a duplicate runtime slot.
-                        withVariantsFromConfiguration(this) {
-                            skip()
-                        }
-                    }
-
-                    runtimeElements {
-                        // Replace the default jar artifact with shadowMergedJar so that
-                        // run configs that resolve runtimeElements properly depend on shadowMergedJar.
-                        outgoing.artifacts.clear()
-                        outgoing.artifact(shadowMergedJar)
-
-                        // Re-add the dev (remapped=true) variant pointing to shadowMergedDevJar.
-                        outgoing.variants.create("remapped") {
-                            attributes {
-                                attribute(REMAPPED_ATTRIBUTE, true)
-                                attribute(RemapNamespaceAttribute.ATTRIBUTE, RemapNamespaceAttribute.INITIAL)
-                            }
-                            artifact(shadowMergedDevJar)
-                        }
-
-                        addVariantsFromConfiguration(this) {
-                            if (configurationVariant.name in listOf("classes", "resources")) {
-                                skip()
-                            }
-                            mapToMavenScope("runtime")
-                        }
-                    }
-                }
-
-                val testTargets = cloche.targets.filter { it.isVersionTarget() }
-
-                testTargets.forEach { target ->
-                    for (variant in listOf(
-                        "${target.featureName}ApiElements",
-                        "${target.featureName}RuntimeElements"
-                    )) {
-                        configurations.named(variant) {
-                            withVariantsFromConfiguration(this) {
-                                skip()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    project.configureFinalJar(
+        containers = listOf(fabricContainer, forgeContainer, neoforgeContainer),
+        allTargets = targets,
+    )
     // endregion
 }
 
