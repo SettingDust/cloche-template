@@ -46,3 +46,9 @@ fun MultiversionDependencies.modrinth(
             action?.invoke(this)
         }
     }
+
+val MultiversionDependencies.mixinextras: MultiversionDependencySpec
+    get() = named("mixinextras").get()
+
+val MultiversionDependencies.klf: MultiversionDependencySpec
+    get() = named("klf").get()

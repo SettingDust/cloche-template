@@ -50,6 +50,16 @@ plugins {
 
 val id: String by rootProject.properties
 
+val multiversionDependencies = objects.newInstance(
+    MultiversionDependencies::class,
+    project,
+    container(MultiversionDependencySpec::class.java)
+)
+
+extensions.extraProperties["multiversionDependencies"] = multiversionDependencies
+
+apply(from = "gradle/multiversion-dependencies.gradle.kts")
+
 // endregion
 
 dependencies {
@@ -659,11 +669,9 @@ cloche {
 
     // endregion
 
-    // region Final Jar
     project.configureFinalJar(
         containers = listOf(fabricContainer, forgeContainer, neoforgeContainer),
         allTargets = targets,
     )
-    // endregion
 }
 
