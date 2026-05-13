@@ -276,10 +276,20 @@ cloche {
 
         dependencies {
             implementation("org.spongepowered:mixin:0.8.7")
-            compileOnly(catalog.mixinextras.common)
-            implementation(catalog.mixinextras.forge)
+            compileOnly(
+                multiversionDependencies
+                    .mixinextras
+                    .resolve(MinecraftModLoader.common, MinecraftVersion.`20_1`)
+                    .toDependency(project)
+            )
+            implementation(
+                multiversionDependencies
+                    .mixinextras
+                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
+                    .toDependency(project)
+            )
             {%- if language == 'kotlin' %}
-            modImplementation(catalog.klf.mc20.forge)
+            modImplementation(multiversionDependencies.klf)
             {%- endif %}
             {%- if has_service %}
             implementation(target(forgeBootstrap))
@@ -341,7 +351,7 @@ cloche {
 
         dependencies {
             {%- if language == 'kotlin' %}
-            modImplementation(catalog.klf.mc21.neoforge)
+            modImplementation(multiversionDependencies.klf)
             {%- endif %}
             {%- if has_service %}
             implementation(target(neoforgeBootstrap))
@@ -379,7 +389,7 @@ cloche {
 
         dependencies {
             {%- if language == 'kotlin' %}
-            modImplementation(catalog.klf.mc26.neoforge)
+            modImplementation(multiversionDependencies.klf)
             {%- endif %}
             {%- if has_service %}
             implementation(target(neoforgeBootstrap261))
@@ -620,7 +630,12 @@ cloche {
             }
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(catalog.klf.mc20.forge)
+            legacyClasspath(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
         }
     }
@@ -642,7 +657,12 @@ cloche {
             }
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(catalog.klf.mc21.neoforge)
+            legacyClasspath(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`21_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
         }
     }
@@ -660,7 +680,12 @@ cloche {
             }
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(catalog.klf.mc26.neoforge)
+            legacyClasspath(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`26_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
         }
     }
