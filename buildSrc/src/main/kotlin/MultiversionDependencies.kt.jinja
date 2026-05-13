@@ -30,6 +30,12 @@ data class ResolvedDependencyVariant(
 
 typealias MultiversionResolver = (MinecraftModLoader, MinecraftVersion) -> VariantOverride
 
+@Suppress("UNCHECKED_CAST")
+private fun <T> VariantField<T>.resolveOr(defaultValue: T): T = when (this) {
+    is VariantField.Set<*> -> value as T
+    else -> defaultValue
+}
+
 open class MultiversionDependencySpec @Inject constructor(
     private val dependencyName: String,
 ) : Named {
@@ -51,25 +57,18 @@ open class MultiversionDependencySpec @Inject constructor(
         artifact: String? = null,
         version: String? = null,
     ): VariantOverride = VariantOverride(
-        group = group?.let(VariantField::Set) ?: VariantField.Keep,
-        artifact = artifact?.let(VariantField::Set) ?: VariantField.Keep,
-        version = version?.let(VariantField::Set) ?: VariantField.Keep,
+        group = group?.let { VariantField.Set(it) } ?: VariantField.Keep,
+        artifact = artifact?.let { VariantField.Set(it) } ?: VariantField.Keep,
+        version = version?.let { VariantField.Set(it) } ?: VariantField.Keep,
     )
 
     fun resolve(loader: MinecraftModLoader, mcVersion: MinecraftVersion): ResolvedDependencyVariant {
         val patch = resolver?.invoke(loader, mcVersion) ?: VariantOverride()
-        val resolvedGroup = when (val value = patch.group) {
-            is VariantField.Set -> value.value
-            VariantField.Keep -> group ?: if (sourceKind == DependencySourceKind.MODRINTH) "maven.modrinth" else null
-        }
-        val resolvedArtifact = when (val value = patch.artifact) {
-            is VariantField.Set -> value.value
-            VariantField.Keep -> artifact
-        }
-        val resolvedVersion = when (val value = patch.version) {
-            is VariantField.Set -> value.value
-            VariantField.Keep -> version
-        }
+        val resolvedGroup = patch.group.resolveOr(
+            group ?: if (sourceKind == DependencySourceKind.MODRINTH) "maven.modrinth" else null
+        )
+        val resolvedArtifact = patch.artifact.resolveOr(artifact)
+        val resolvedVersion = patch.version.resolveOr(version)
 
         require(resolvedArtifact.isNotBlank()) {
             "Dependency $name resolved an empty artifact for $loader / $mcVersion"

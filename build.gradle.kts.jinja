@@ -289,7 +289,12 @@ cloche {
                     .toDependency(project)
             )
             {%- if language == 'kotlin' %}
-            modImplementation(multiversionDependencies.klf)
+            modImplementation(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
             {%- if has_service %}
             implementation(target(forgeBootstrap))
@@ -351,7 +356,12 @@ cloche {
 
         dependencies {
             {%- if language == 'kotlin' %}
-            modImplementation(multiversionDependencies.klf)
+            modImplementation(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`21_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
             {%- if has_service %}
             implementation(target(neoforgeBootstrap))
@@ -389,7 +399,12 @@ cloche {
 
         dependencies {
             {%- if language == 'kotlin' %}
-            modImplementation(multiversionDependencies.klf)
+            modImplementation(
+                multiversionDependencies
+                    .klf
+                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`26_1`)
+                    .toDependency(project)
+            )
             {%- endif %}
             {%- if has_service %}
             implementation(target(neoforgeBootstrap261))
