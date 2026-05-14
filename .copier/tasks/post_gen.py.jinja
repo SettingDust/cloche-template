@@ -123,10 +123,29 @@ def remove_bootstrap_kotlin_folders(root: Path) -> None:
             shutil.rmtree(kotlin_dir)
 
 
+def remove_service_agnostic_folders(root: Path) -> None:
+    """When has_service=false, remove bootstrap and minecraft directories (not needed for base mod)."""
+    for folder in ["src/forge/bootstrap", "src/neoforge/bootstrap", "src/minecraft"]:
+        path = root / folder
+        if path.is_dir():
+            shutil.rmtree(path)
+
+
+def remove_common_kotlin_when_service_kotlin(root: Path) -> None:
+    """When has_service=true and language=kotlin, remove common/common/main/kotlin."""
+    if HAS_SERVICE and LANGUAGE == "kotlin":
+        kotlin_dir = root / "src" / "common" / "common" / "main" / "kotlin"
+        if kotlin_dir.is_dir():
+            shutil.rmtree(kotlin_dir)
+
+
 if __name__ == "__main__":
     root = Path.cwd()
     if HAS_SERVICE:
         migrate_identifier_and_minecraft_adapters(root)
         remove_loader_adapter_from_minecraft_when_bootstrap(root)
+    else:
+        remove_service_agnostic_folders(root)
     remove_language_files(root)
     remove_bootstrap_kotlin_folders(root)
+    remove_common_kotlin_when_service_kotlin(root)
