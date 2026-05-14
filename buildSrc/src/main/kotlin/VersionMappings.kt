@@ -1,10 +1,11 @@
+package settingdust.cloche_template.buildsrc
+
 import earth.terrarium.cloche.api.target.FabricTarget
 import earth.terrarium.cloche.api.target.ForgeLikeTarget
 import earth.terrarium.cloche.api.target.MinecraftTarget
 import net.msrandom.minecraftcodev.core.utils.lowerCamelCaseGradleName
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
-import org.gradle.kotlin.dsl.named
 
 fun String.fabricApiVersion(): String? = when (this) {
     "1.20.1" -> "0.92.7"

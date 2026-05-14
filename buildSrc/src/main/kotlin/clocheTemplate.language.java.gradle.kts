@@ -1,3 +1,5 @@
+import settingdust.cloche_template.buildsrc.*
+
 val modName = providers.gradleProperty("name").get()
 
 clocheTemplatePresetConventions {

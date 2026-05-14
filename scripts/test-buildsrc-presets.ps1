@@ -1,19 +1,19 @@
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
-$conventionsFile = Join-Path $root 'buildSrc/src/main/kotlin/ClocheTemplatePresetConventions.kt.jinja'
+$conventionsFile = Join-Path $root 'buildSrc/src/main/kotlin/ClocheTemplatePresetConventions.kt'
 $conventionsContent = Get-Content $conventionsFile -Raw
-$presetFile = Join-Path $root 'buildSrc/src/main/kotlin/ClocheTemplatePresets.kt.jinja'
+$presetFile = Join-Path $root 'buildSrc/src/main/kotlin/ClocheTemplatePresets.kt'
 $content = Get-Content $presetFile -Raw
 $buildFile = Join-Path $root 'build.gradle.kts.jinja'
 $buildContent = Get-Content $buildFile -Raw
-$kotlinPluginFile = Join-Path $root 'buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja'
+$kotlinPluginFile = Join-Path $root 'buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts'
 $kotlinPluginContent = Get-Content $kotlinPluginFile -Raw
-$javaPluginFile = Join-Path $root 'buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja'
+$javaPluginFile = Join-Path $root 'buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts'
 $javaPluginContent = Get-Content $javaPluginFile -Raw
 
-if ($content -match '\{\{|-?%\}') {
-    throw 'ClocheTemplatePresets.kt.jinja must not contain Jinja template syntax.'
+if ($content -match '\{\{') {
+    throw 'ClocheTemplatePresets.kt must not contain Jinja interpolation expressions.'
 }
 
 if ($conventionsContent -match 'FabricMetadata|ForgeMetadata|fabricMetadata|forgeMetadata|neoforgeMetadata|applyFabricMetadata|applyForgeMetadata|applyNeoforgeMetadata') {

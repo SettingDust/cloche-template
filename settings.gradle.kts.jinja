@@ -16,22 +16,6 @@ dependencyResolutionManagement {
 
 // #endregion
 
-// #region Version Catalog
-
-dependencyResolutionManagement.versionCatalogs.create("catalog") {
-    library("mixin-fabric", "net.fabricmc", "sponge-mixin")
-        .version("0.17.3+mixin.0.8.7")
-
-    library("preloadingTricks", "settingdust.preloading_tricks", "PreloadingTricks")
-        .version("3.5.12")
-
-{% if language == 'kotlin' %}
-    library("fabric-language-kotlin", "net.fabricmc","fabric-language-kotlin").version("1.13.11+kotlin.2.3.21")
-    {% endif %}
-}
-
-// #endregion
-
 // #region Project Settings
 
 plugins {

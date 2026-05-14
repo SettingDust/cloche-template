@@ -14,15 +14,15 @@
 
 ### Files to Create
 
-- `buildSrc/build.gradle.kts.jinja`
+- `buildSrc/build.gradle.kts`
 - `buildSrc/src/main/kotlin/clocheTemplate.base.gradle.kts.jinja`
-- `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja`
-- `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja`
+- `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts`
+- `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts`
 - `buildSrc/src/main/kotlin/ClocheTemplateMetadata.kt.jinja`
-- `buildSrc/src/main/kotlin/ClocheTemplatePresets.kt.jinja`
-- `buildSrc/src/main/kotlin/ContainerDsl.kt.jinja`
-- `buildSrc/src/main/kotlin/CompatibilityRules.kt.jinja`
-- `buildSrc/src/main/kotlin/VersionMappings.kt.jinja`
+- `buildSrc/src/main/kotlin/ClocheTemplatePresets.kt`
+- `buildSrc/src/main/kotlin/ContainerDsl.kt`
+- `buildSrc/src/main/kotlin/CompatibilityRules.kt`
+- `buildSrc/src/main/kotlin/VersionMappings.kt`
 
 ### Files to Modify
 
@@ -42,13 +42,13 @@
 ### Task 1: Add `buildSrc` generation skeleton
 
 **Files:**
-- Create: `buildSrc/build.gradle.kts.jinja`
+- Create: `buildSrc/build.gradle.kts`
 - Modify: `copier.yml`
 - Modify: `AGENTS.md`
 
 - [ ] **Step 1: Add generated `buildSrc` to the template layout**
 
-Create `buildSrc/build.gradle.kts.jinja` with the plugin and dependency skeleton below.
+Create `buildSrc/build.gradle.kts` with the plugin and dependency skeleton below.
 
 ```kotlin
 plugins {
@@ -117,21 +117,21 @@ Expected: success and a generated `buildSrc` directory in the destination.
 - [ ] **Step 5: Commit the scaffold**
 
 ```bash
-git add copier.yml AGENTS.md buildSrc/build.gradle.kts.jinja
+git add copier.yml AGENTS.md buildSrc/build.gradle.kts
 git commit -m "build: add generated buildSrc scaffold"
 ```
 
 ### Task 2: Extract shared support code into Kotlin sources
 
 **Files:**
-- Create: `buildSrc/src/main/kotlin/ContainerDsl.kt.jinja`
-- Create: `buildSrc/src/main/kotlin/CompatibilityRules.kt.jinja`
-- Create: `buildSrc/src/main/kotlin/VersionMappings.kt.jinja`
+- Create: `buildSrc/src/main/kotlin/ContainerDsl.kt`
+- Create: `buildSrc/src/main/kotlin/CompatibilityRules.kt`
+- Create: `buildSrc/src/main/kotlin/VersionMappings.kt`
 - Modify: `build.gradle.kts.jinja`
 
-- [ ] **Step 1: Move container DSL implementation into `ContainerDsl.kt.jinja`**
+- [ ] **Step 1: Move container DSL implementation into `ContainerDsl.kt`**
 
-Create `buildSrc/src/main/kotlin/ContainerDsl.kt.jinja` and move the current root-script support code into an object-free Kotlin source file. Start the file with the imports and top-level declarations below.
+Create `buildSrc/src/main/kotlin/ContainerDsl.kt` and move the current root-script support code into an object-free Kotlin source file. Start the file with the imports and top-level declarations below.
 
 ```kotlin
 @file:Suppress("UnstableApiUsage", "INVISIBLE_REFERENCE")
@@ -171,7 +171,7 @@ import org.gradle.kotlin.dsl.support.serviceOf
 
 Then move `ContainerScope`, `MinecraftModLoader.containerFeatureName()`, and `ClocheExtension.container(...)` out of `build.gradle.kts.jinja` into this file.
 
-- [ ] **Step 2: Move compatibility rules into `CompatibilityRules.kt.jinja`**
+- [ ] **Step 2: Move compatibility rules into `CompatibilityRules.kt`**
 
 Create the file with the extracted rules from the root script.
 
@@ -196,7 +196,7 @@ class MinecraftModLoaderCompatibilityRule : AttributeCompatibilityRule<Minecraft
 }
 ```
 
-- [ ] **Step 3: Move version and task-name helpers into `VersionMappings.kt.jinja`**
+- [ ] **Step 3: Move version and task-name helpers into `VersionMappings.kt`**
 
 Create the file and move the current root-script extension functions and task-name helpers into it.
 
@@ -238,7 +238,7 @@ Expected: success and generated `buildSrc/src/main/kotlin` files in the destinat
 - [ ] **Step 6: Commit the extraction**
 
 ```bash
-git add build.gradle.kts.jinja buildSrc/src/main/kotlin/ContainerDsl.kt.jinja buildSrc/src/main/kotlin/CompatibilityRules.kt.jinja buildSrc/src/main/kotlin/VersionMappings.kt.jinja
+git add build.gradle.kts.jinja buildSrc/src/main/kotlin/ContainerDsl.kt buildSrc/src/main/kotlin/CompatibilityRules.kt buildSrc/src/main/kotlin/VersionMappings.kt
 git commit -m "refactor: extract build logic support sources"
 ```
 
@@ -246,8 +246,8 @@ git commit -m "refactor: extract build logic support sources"
 
 **Files:**
 - Create: `buildSrc/src/main/kotlin/clocheTemplate.base.gradle.kts.jinja`
-- Create: `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja`
-- Create: `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja`
+- Create: `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts`
+- Create: `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts`
 - Create: `buildSrc/src/main/kotlin/ClocheTemplateMetadata.kt.jinja`
 - Modify: `build.gradle.kts.jinja`
 
@@ -307,7 +307,7 @@ Then add back the remaining custom Maven blocks from the current root script.
 
 - [ ] **Step 2: Create language convention plugins**
 
-Create `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja`.
+Create `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts`.
 
 ```kotlin
 plugins {
@@ -316,7 +316,7 @@ plugins {
 }
 ```
 
-Create `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja` as an intentionally empty marker plugin.
+Create `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts` as an intentionally empty marker plugin.
 
 ```kotlin
 plugins {
@@ -378,7 +378,7 @@ Expected: `BUILD SUCCESSFUL`.
 - [ ] **Step 6: Commit the convention layer**
 
 ```bash
-git add build.gradle.kts.jinja buildSrc/src/main/kotlin/clocheTemplate.base.gradle.kts.jinja buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja buildSrc/src/main/kotlin/ClocheTemplateMetadata.kt.jinja
+git add build.gradle.kts.jinja buildSrc/src/main/kotlin/clocheTemplate.base.gradle.kts.jinja buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts buildSrc/src/main/kotlin/ClocheTemplateMetadata.kt.jinja
 git commit -m "refactor: add clocheTemplate convention plugins"
 ```
 

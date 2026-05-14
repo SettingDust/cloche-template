@@ -1,9 +1,12 @@
+package settingdust.cloche_template.buildsrc
+
 import earth.terrarium.cloche.api.attributes.MinecraftModLoader
 import earth.terrarium.cloche.api.target.FabricTarget
 import earth.terrarium.cloche.api.target.ForgeTarget
 import earth.terrarium.cloche.api.target.MinecraftTarget
 import earth.terrarium.cloche.api.target.NeoforgeTarget
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.DependencyCollector
 
 fun MinecraftTarget.multiversionLoader(): MinecraftModLoader = when (this) {
@@ -13,7 +16,9 @@ fun MinecraftTarget.multiversionLoader(): MinecraftModLoader = when (this) {
     else -> MinecraftModLoader.common
 }
 
-context(target: MinecraftTarget, project: Project)
-operator fun DependencyCollector.invoke(spec: MultiversionDependencySpec) {
-    add(spec.resolve(target.multiversionLoader(), target.minecraftVersionEnum()).toDependency(project))
+fun MultiversionDependencySpec.resolve(target: MinecraftTarget, project: Project): ExternalModuleDependency =
+    resolve(target.multiversionLoader(), target.minecraftVersionEnum(), project)
+
+operator fun DependencyCollector.invoke(target: MinecraftTarget, project: Project, spec: MultiversionDependencySpec) {
+    add(spec.resolve(target, project))
 }

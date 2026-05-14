@@ -35,6 +35,7 @@ import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.support.serviceOf
+import settingdust.cloche_template.buildsrc.*
 import java.nio.charset.StandardCharsets
 
 plugins {
@@ -49,16 +50,6 @@ plugins {
 // region Project Properties
 
 val id: String by rootProject.properties
-
-val multiversionDependencies = objects.newInstance(
-    MultiversionDependencies::class,
-    project,
-    container(MultiversionDependencySpec::class.java)
-)
-
-extensions.extraProperties["multiversionDependencies"] = multiversionDependencies
-
-apply(from = "gradle/multiversion-dependencies.gradle.kts")
 
 // endregion
 
@@ -80,19 +71,7 @@ dependencies {
 }
 
 cloche {
-    // region Metadata & Mappings
-
-    clocheTemplateMetadata(project)
-
-    mappings {
-        official()
-    }
-
-    // endregion
-
     // region Common Targets
-
-    common {}
 
     val commonMain = common("common:common") {
         // mixins.from(file("src/common/common/main/resources/$id.mixins.json"))
@@ -142,31 +121,6 @@ cloche {
         dependsOn(minecraft)
     }
     {%- endif %}
-    // endregion
-
-    // region Shared Target Defaults
-
-    targets.withType<FabricTarget> {
-        fabricDefaults(project)
-
-        {%- if language == 'kotlin' %}
-        dependencies {
-            modImplementation(catalog.fabric.language.kotlin)
-        }
-        {%- endif %}
-    }
-
-    targets.withType<ForgeTarget> {
-        forgeDefaults(project)
-    }
-
-    targets.withType<NeoforgeTarget> {
-        neoforgeDefaults(project)
-    }
-
-    targets.all {
-        commonDefaults(project)
-    }
     // endregion
 
     // region Main Targets - Fabric
@@ -277,23 +231,14 @@ cloche {
         dependencies {
             implementation("org.spongepowered:mixin:0.8.7")
             compileOnly(
-                multiversionDependencies
-                    .mixinextras
-                    .resolve(MinecraftModLoader.common, MinecraftVersion.`20_1`)
-                    .toDependency(project)
+                multiversionDependencies.mixinextras.resolve(MinecraftModLoader.common, MinecraftVersion.`20_1`, project)
             )
             implementation(
-                multiversionDependencies
-                    .mixinextras
-                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
-                    .toDependency(project)
+                multiversionDependencies.mixinextras.resolve(this@forge, project)
             )
             {%- if language == 'kotlin' %}
             modImplementation(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
-                    .toDependency(project)
+                multiversionDependencies.klf.resolve(this@forge, project)
             )
             {%- endif %}
             {%- if has_service %}
@@ -357,10 +302,7 @@ cloche {
         dependencies {
             {%- if language == 'kotlin' %}
             modImplementation(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`21_1`)
-                    .toDependency(project)
+                multiversionDependencies.klf.resolve(this@neoforge, project)
             )
             {%- endif %}
             {%- if has_service %}
@@ -400,10 +342,7 @@ cloche {
         dependencies {
             {%- if language == 'kotlin' %}
             modImplementation(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`26_1`)
-                    .toDependency(project)
+                multiversionDependencies.klf.resolve(this@neoforge, project)
             )
             {%- endif %}
             {%- if has_service %}
@@ -640,17 +579,10 @@ cloche {
                 isTransitive = false
             }
 
-            legacyClasspath(catalog.preloadingTricks) {
-                isTransitive = false
-            }
+            legacyClasspath(multiversionDependencies.preloadingTricks.resolve(this@forge, project).apply { isTransitive = false })
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.forge, MinecraftVersion.`20_1`)
-                    .toDependency(project)
-            )
+            legacyClasspath(this@forge, project, multiversionDependencies.klf)
             {%- endif %}
         }
     }
@@ -667,17 +599,10 @@ cloche {
                 isTransitive = false
             }
 
-            legacyClasspath(catalog.preloadingTricks) {
-                isTransitive = false
-            }
+            legacyClasspath(multiversionDependencies.preloadingTricks.resolve(this@neoforge, project).apply { isTransitive = false })
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`21_1`)
-                    .toDependency(project)
-            )
+            legacyClasspath(multiversionDependencies.klf.resolve(this@neoforge, project))
             {%- endif %}
         }
     }
@@ -690,17 +615,10 @@ cloche {
                 isTransitive = false
             }
 
-            legacyClasspath(catalog.preloadingTricks) {
-                isTransitive = false
-            }
+            legacyClasspath(multiversionDependencies.preloadingTricks.resolve(this@neoforge, project).apply { isTransitive = false })
 
             {%- if language == 'kotlin' %}
-            legacyClasspath(
-                multiversionDependencies
-                    .klf
-                    .resolve(MinecraftModLoader.neoforge, MinecraftVersion.`26_1`)
-                    .toDependency(project)
-            )
+            legacyClasspath(multiversionDependencies.klf.resolve(this@neoforge, project))
             {%- endif %}
         }
     }

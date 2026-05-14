@@ -1,3 +1,5 @@
+package settingdust.cloche_template.buildsrc
+
 import earth.terrarium.cloche.ClocheExtension
 import earth.terrarium.cloche.api.metadata.CommonMetadata
 import org.gradle.api.Project
@@ -11,7 +13,7 @@ fun ClocheExtension.clocheTemplateMetadata(project: Project) {
         modId.set(id)
         name.set(rootProject.property("name").toString())
         description.set(rootProject.property("description").toString())
-        license.set("{{ license }}")
+        license.set("Apache License 2.0")
         icon.set("assets/$id/icon.png")
         sources.set(source)
         issues.set("$source/issues")

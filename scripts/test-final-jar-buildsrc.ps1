@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $buildFile = Join-Path $root 'build.gradle.kts.jinja'
 $buildContent = Get-Content $buildFile -Raw
-$helperFile = Join-Path $root 'buildSrc/src/main/kotlin/FinalJarDsl.kt.jinja'
+$helperFile = Join-Path $root 'buildSrc/src/main/kotlin/FinalJarDsl.kt'
 
 if ($buildContent -match 'class\s+ForgeMetadataTransformer') {
     throw 'build.gradle.kts.jinja must not define ForgeMetadataTransformer directly.'
@@ -18,5 +18,5 @@ if ($buildContent -notmatch 'configureFinalJar\(') {
 }
 
 if (-not (Test-Path $helperFile)) {
-    throw 'FinalJarDsl.kt.jinja must exist in buildSrc.'
+    throw 'FinalJarDsl.kt must exist in buildSrc.'
 }

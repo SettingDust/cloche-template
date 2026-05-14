@@ -1,3 +1,5 @@
+package settingdust.cloche_template.buildsrc
+
 import earth.terrarium.cloche.api.attributes.MinecraftModLoader
 import org.gradle.api.attributes.AttributeCompatibilityRule
 import org.gradle.api.attributes.CompatibilityCheckDetails

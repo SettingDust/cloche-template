@@ -1,4 +1,5 @@
 import earth.terrarium.cloche.api.metadata.CommonMetadata
+import settingdust.cloche_template.buildsrc.*
 
 plugins {
     kotlin("jvm")
@@ -9,6 +10,10 @@ val modName = providers.gradleProperty("name").get()
 
 clocheTemplatePresetConventions {
     fabric {
+        dependencies {
+            modImplementation(project.multiversionDependencies.fabricLanguageKotlin.resolve(project))
+        }
+
         if (!isVersionTarget()) {
             metadata {
                 entrypoint("main") {

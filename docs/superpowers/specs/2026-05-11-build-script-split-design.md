@@ -232,15 +232,15 @@ Repository planning and design documents under `docs/` are not part of generated
 
 Add a generated `buildSrc` with at least:
 
-- `buildSrc/build.gradle.kts.jinja`
+- `buildSrc/build.gradle.kts`
 - `buildSrc/src/main/kotlin/clocheTemplate.base.gradle.kts.jinja`
-- `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts.jinja`
-- `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts.jinja`
+- `buildSrc/src/main/kotlin/clocheTemplate.language.kotlin.gradle.kts`
+- `buildSrc/src/main/kotlin/clocheTemplate.language.java.gradle.kts`
 - `buildSrc/src/main/kotlin/ClocheTemplateMetadata.kt.jinja`
-- `buildSrc/src/main/kotlin/ClocheTemplatePresets.kt.jinja`
-- `buildSrc/src/main/kotlin/ContainerDsl.kt.jinja`
-- `buildSrc/src/main/kotlin/CompatibilityRules.kt.jinja`
-- `buildSrc/src/main/kotlin/VersionMappings.kt.jinja`
+- `buildSrc/src/main/kotlin/ClocheTemplatePresets.kt`
+- `buildSrc/src/main/kotlin/ContainerDsl.kt`
+- `buildSrc/src/main/kotlin/CompatibilityRules.kt`
+- `buildSrc/src/main/kotlin/VersionMappings.kt`
 
 Exact filenames can change, but the split should separate:
 

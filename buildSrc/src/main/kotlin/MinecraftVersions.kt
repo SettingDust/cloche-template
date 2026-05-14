@@ -1,3 +1,5 @@
+package settingdust.cloche_template.buildsrc
+
 enum class MinecraftVersion(val value: String) {
     `20_1`("1.20.1"),
     `21_1`("1.21.1"),

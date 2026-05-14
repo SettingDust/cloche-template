@@ -1,3 +1,4 @@
+import settingdust.cloche_template.buildsrc.*
 import groovy.lang.Closure
 
 plugins {
@@ -11,10 +12,23 @@ plugins {
 val archive_name: String by rootProject.properties
 val gitVersion: Closure<String> by extra
 
-group = "{{ group }}"
+group = "settingdust.cloche_template_developing"
 version = gitVersion()
 
 createClocheTemplatePresetConventions()
+createMultiversionDependencies()
+
+cloche {
+    clocheTemplateMetadata(project)
+
+    mappings {
+        official()
+    }
+
+    common {}
+
+    targets.applySharedTargetDefaults(project)
+}
 
 base { archivesName = archive_name }
 

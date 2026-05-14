@@ -1,3 +1,5 @@
+package settingdust.cloche_template.buildsrc
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.PreserveFirstFoundResourceTransformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.ResourceTransformer
