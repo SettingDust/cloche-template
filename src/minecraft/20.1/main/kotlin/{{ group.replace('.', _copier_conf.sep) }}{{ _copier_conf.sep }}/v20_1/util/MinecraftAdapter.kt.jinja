@@ -1,0 +1,10 @@
+package {{group}}.v20_1.util
+
+import {{group}}.util.MinecraftAdapter
+import {{group}}.util.MinecraftVersion
+
+class MinecraftAdapter : MinecraftAdapter {
+    init {
+        MinecraftVersion.V1201.requireCurrent()
+    }
+}

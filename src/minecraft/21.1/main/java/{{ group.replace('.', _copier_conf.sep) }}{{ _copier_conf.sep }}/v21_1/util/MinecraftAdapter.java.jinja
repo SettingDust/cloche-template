@@ -1,0 +1,9 @@
+package {{group}}.v21_1.util;
+
+import {{group}}.util.MinecraftVersion;
+
+public class MinecraftAdapter implements {{group}}.util.MinecraftAdapter {
+    public MinecraftAdapter() {
+        MinecraftVersion.V1211.requireCurrent();
+    }
+}

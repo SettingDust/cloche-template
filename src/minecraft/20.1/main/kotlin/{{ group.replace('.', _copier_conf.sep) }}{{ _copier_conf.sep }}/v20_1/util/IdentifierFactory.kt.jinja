@@ -1,0 +1,20 @@
+package {{group}}.v20_1.util
+
+import net.minecraft.resources.ResourceLocation
+import {{group}}.util.CommonIdentifier
+import {{group}}.util.IdentifierFactory
+import {{group}}.util.MinecraftVersion
+
+class IdentifierFactory : IdentifierFactory {
+    init {
+        MinecraftVersion.V1201.requireCurrent()
+    }
+
+    @Suppress("USELESS_CAST")
+    override fun create(namespace: String, path: String): CommonIdentifier =
+        ResourceLocation(namespace, path) as CommonIdentifier
+
+    @Suppress("USELESS_CAST")
+    override fun parse(value: String): CommonIdentifier =
+        ResourceLocation(value) as CommonIdentifier
+}

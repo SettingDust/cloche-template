@@ -1,0 +1,132 @@
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+
+HAS_SERVICE = {{ "True" if has_service else "False" }}
+LANGUAGE = "{{ language }}"
+
+
+def copy_if_exists(src: Path, dst: Path) -> None:
+    if not src.exists():
+        return
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+
+
+def remove_if_exists(path: Path) -> None:
+    if path.exists():
+        path.unlink()
+
+
+def remove_dir_if_exists(path: Path) -> None:
+    if path.is_dir():
+        shutil.rmtree(path)
+
+
+def remove_files_recursively(root: Path, predicate) -> None:
+    """Recursively remove files matching predicate under root."""
+    if not root.is_dir():
+        return
+    for item in root.rglob("*"):
+        if item.is_file() and predicate(item):
+            item.unlink()
+            # Clean up empty parent directories
+            parent = item.parent
+            while parent != root and parent.exists():
+                try:
+                    parent.rmdir()
+                    parent = parent.parent
+                except OSError:
+                    break
+
+
+def migrate_identifier_and_minecraft_adapters(root: Path) -> None:
+    version_map = {
+        "20.1": "v20_1",
+        "21.1": "v21_1",
+        "26.1": "v26_1",
+    }
+
+    for version, vdir in version_map.items():
+        common_main = root / "src" / "common" / version / "main"
+        minecraft_main = root / "src" / "minecraft" / version / "main"
+
+        for lang, ext in (("java", "java"), ("kotlin", "kt")):
+            for name in ("IdentifierFactory", "MinecraftAdapter"):
+                src = common_main / lang / "{{ group.replace('.', _copier_conf.sep) }}{{ _copier_conf.sep }}" / vdir / "util" / f"{name}.{ext}.jinja"
+                dst = minecraft_main / lang / "{{ group.replace('.', _copier_conf.sep) }}{{ _copier_conf.sep }}" / vdir / "util" / f"{name}.{ext}.jinja"
+                copy_if_exists(src, dst)
+                remove_if_exists(src)
+
+        for name in ("IdentifierFactory", "MinecraftAdapter"):
+            src = common_main / "resources" / "META-INF" / "services" / f"{{group}}.util.{name}.jinja"
+            dst = minecraft_main / "resources" / "META-INF" / "services" / f"{{group}}.util.{name}.jinja"
+            copy_if_exists(src, dst)
+            remove_if_exists(src)
+
+
+def remove_loader_adapter_from_minecraft_when_bootstrap(root: Path) -> None:
+    """When has_service=true, remove minecraft-side LoaderAdapter files (we implement in bootstrap)."""
+    for loader in ("forge", "neoforge"):
+        base = root / "src" / loader / "minecraft"
+        
+        def is_loader_adapter(p: Path) -> bool:
+            return "LoaderAdapter" in p.name
+        
+        remove_files_recursively(base, is_loader_adapter)
+
+
+def remove_language_files(root: Path) -> None:
+    """
+    Remove language-specific directories:
+    - If language='java': remove all **/main/kotlin
+    - If language='kotlin' and not has_service: remove all **/main/java
+    - If language='kotlin' and has_service: remove selected java directories
+    """
+    if LANGUAGE == "java":
+        # Remove kotlin directories
+        for kotlin_dir in list(root.glob("src/**/main/kotlin")):
+            if kotlin_dir.is_dir():
+                shutil.rmtree(kotlin_dir)
+    elif LANGUAGE == "kotlin":
+        if not HAS_SERVICE:
+            # Remove all java directories
+            for java_dir in list(root.glob("src/**/main/java")):
+                if java_dir.is_dir():
+                    shutil.rmtree(java_dir)
+        else:
+            # Remove selected java directories
+            java_dirs_to_remove = [
+                "src/common/20.1/main/java",
+                "src/common/21.1/main/java",
+                "src/common/26.1/main/java",
+                "src/fabric/common/main/java",
+                "src/forge/minecraft/main/java",
+                "src/neoforge/minecraft/common/main/java",
+            ]
+            for pattern in java_dirs_to_remove:
+                for java_dir in list(root.glob(pattern)):
+                    if java_dir.is_dir():
+                        shutil.rmtree(java_dir)
+            # Also remove versioned minecraft java
+            for java_dir in list(root.glob("src/minecraft/*/main/java")):
+                if java_dir.is_dir():
+                    shutil.rmtree(java_dir)
+
+
+def remove_bootstrap_kotlin_folders(root: Path) -> None:
+    """Bootstrap must be Java; remove all kotlin directories from bootstrap."""
+    for kotlin_dir in list(root.glob("src/*/bootstrap/**/main/kotlin")):
+        if kotlin_dir.is_dir():
+            shutil.rmtree(kotlin_dir)
+
+
+if __name__ == "__main__":
+    root = Path.cwd()
+    if HAS_SERVICE:
+        migrate_identifier_and_minecraft_adapters(root)
+        remove_loader_adapter_from_minecraft_when_bootstrap(root)
+    remove_language_files(root)
+    remove_bootstrap_kotlin_folders(root)

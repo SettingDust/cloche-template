@@ -1,0 +1,20 @@
+package {{group}}.v26_1.util
+
+import net.minecraft.resources.Identifier
+import {{group}}.util.CommonIdentifier
+import {{group}}.util.IdentifierFactory
+import {{group}}.util.MinecraftVersion
+
+class IdentifierFactory : IdentifierFactory {
+    init {
+        MinecraftVersion.V261.requireCurrent()
+    }
+
+    @Suppress("USELESS_CAST")
+    override fun create(namespace: String, path: String): CommonIdentifier =
+        Identifier.fromNamespaceAndPath(namespace, path) as CommonIdentifier
+
+    @Suppress("USELESS_CAST")
+    override fun parse(value: String): CommonIdentifier =
+        Identifier.parse(value) as CommonIdentifier
+}

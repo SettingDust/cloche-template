@@ -1,0 +1,21 @@
+package {{group}}.v20_1.util;
+
+import net.minecraft.resources.ResourceLocation;
+import {{group}}.util.CommonIdentifier;
+import {{group}}.util.MinecraftVersion;
+
+public class IdentifierFactory implements {{group}}.util.IdentifierFactory {
+    public IdentifierFactory() {
+        MinecraftVersion.V1201.requireCurrent();
+    }
+
+    @Override
+    public CommonIdentifier create(String namespace, String path) {
+        return (CommonIdentifier) (Object) new ResourceLocation(namespace, path);
+    }
+
+    @Override
+    public CommonIdentifier parse(String value) {
+        return (CommonIdentifier) (Object) new ResourceLocation(value);
+    }
+}

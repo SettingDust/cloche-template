@@ -262,21 +262,25 @@ cloche {
     // region Main Targets - NeoForge
     {%- if has_service %}
 
-    val neoforgeBootstrap = neoforge("neoforge:bootstrap:21.1") {
-        dependsOn(common211)
+    val neoforgeBootstrapCommon = common("neoforge:bootstrap:common") {
+        dependsOn(commonMain)
+    }
+
+    val neoforgeBootstrap211 = neoforge("neoforge:bootstrap:21.1") {
+        dependsOn(common211, neoforgeBootstrapCommon)
         minecraftVersion = "1.21.1"
         bootstrapDefaults(project)
     }
 
     val neoforgeBootstrap261 = neoforge("neoforge:bootstrap:26.1") {
-        dependsOn(common261)
+        dependsOn(common261, neoforgeBootstrapCommon)
         minecraftVersion = "26.1.2"
         bootstrapDefaults(project)
     }
     {%- endif %}
 
     val neoforgeMinecraftCommon = common("neoforge:minecraft:common") {
-        dependsOn(commonMain)
+        dependsOn(minecraft)
 
         mixins.from(file("src/neoforge/minecraft/common/main/resources/$id.neoforge.mixins.json"))
     }
@@ -306,7 +310,7 @@ cloche {
             )
             {%- endif %}
             {%- if has_service %}
-            implementation(target(neoforgeBootstrap))
+            implementation(target(neoforgeBootstrap211))
             {%- endif %}
         }
 
@@ -505,7 +509,7 @@ cloche {
             include(project(":", mergedRuntimeElements.name))
             includeDev(project(":", mergedDevRuntimeElements.name))
             {%- if has_service %}
-            embed(target(neoforgeBootstrap))
+            embed(target(neoforgeBootstrap211))
             embed(target(neoforgeBootstrap261))
             {%- endif %}
         }

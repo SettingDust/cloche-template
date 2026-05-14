@@ -1,0 +1,21 @@
+package {{group}}.v26_1.util;
+
+import net.minecraft.resources.Identifier;
+import {{group}}.util.CommonIdentifier;
+import {{group}}.util.MinecraftVersion;
+
+public class IdentifierFactory implements {{group}}.util.IdentifierFactory {
+    public IdentifierFactory() {
+        MinecraftVersion.V261.requireCurrent();
+    }
+
+    @Override
+    public CommonIdentifier create(String namespace, String path) {
+        return (CommonIdentifier) (Object) Identifier.fromNamespaceAndPath(namespace, path);
+    }
+
+    @Override
+    public CommonIdentifier parse(String value) {
+        return (CommonIdentifier) (Object) Identifier.parse(value);
+    }
+}
