@@ -262,7 +262,7 @@ cloche {
     // region Main Targets - NeoForge
     {%- if has_service %}
 
-    val neoforgeBootstrap = neoforge("neoforge:bootstrap") {
+    val neoforgeBootstrap = neoforge("neoforge:bootstrap:21.1") {
         dependsOn(common211)
         minecraftVersion = "1.21.1"
         bootstrapDefaults(project)
