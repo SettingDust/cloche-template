@@ -12,10 +12,6 @@ import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
 
 fun MinecraftTarget.commonDefaults(project: Project) {
-    if (isVersionTarget()) {
-        disableVersionTemplateTasks(project)
-    }
-
     runs {
         client.onConfigured {
             it.jvmArguments(
@@ -30,6 +26,14 @@ fun MinecraftTarget.commonDefaults(project: Project) {
         minecraftVersion.orNull
             ?.let(String::parchmentVersion)
             ?.let(::parchment)
+    }
+    
+    if (isVersionTarget()) {
+        disableVersionTemplateTasks(project)
+
+        runs {
+            client()
+        }
     }
 }
 
