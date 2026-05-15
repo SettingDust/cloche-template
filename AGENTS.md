@@ -9,7 +9,7 @@ This is a **Copier template** for generating multi-loader Minecraft mod projects
 - **Multi-loader support**: Generates Fabric, Forge, and NeoForge mod projects with shared code structures
 - **Multi-version support**: Targets multiple Minecraft versions with version-specific source code separation
 - **Language choice**: Supports both Kotlin and Java
-- **Gradle-based**: Uses modern Gradle with version catalogs and Cloche build framework
+- **Gradle-based**: Uses modern Gradle, buildSrc convention plugins, and Cloche build framework
 - **Template-driven**: Jinja2 templates with dynamic project generation
 - **Optional bootstrap layer**: Configurable Forge/NeoForge bootstrap-side code generation
 
@@ -21,7 +21,7 @@ This is a **Copier template** for generating multi-loader Minecraft mod projects
 - **Packaging**: Shadow plugin for JAR shadowing/bundling
 - **Mod Loaders**: Fabric, Forge, NeoForge
 - **Languages**: Kotlin (v2.3.20) or Java
-- **JVM Target**: Java version determined by build.gradle.kts.jinja and Minecraft version
+- **JVM Target**: buildSrc uses JVM toolchain 25; generated mod targets are configured by the language convention plugins and Minecraft toolchains
 
 ## Using This Template
 
@@ -56,6 +56,7 @@ When running `copier copy`, you'll be prompted for:
 ### Post-Generation Tasks
 
 After project generation, Copier automatically:
+1. Runs `.copier/tasks/post_gen.py` to migrate/remove feature- and language-specific template files
 1. Initializes a git repository (`git init`)
 2. Stages all files (`git add .`)
 3. Makes gradlew executable (`git update-index --chmod=+x ./gradlew`)
@@ -80,13 +81,18 @@ Files ending in `.jinja` are processed by Copier during generation. Common templ
 - **Conditionals**: `{% if condition %}content{% endif %}`
 - **Filters**: `| to_snake`, `| to_kebab`, `| lower`
 
-### Conditional Exclusion
+### Conditional Exclusion and Post-Generation Cleanup
 
-The `_exclude` list in copier.yml controls which folders/files are pruned after rendering:
+The `_exclude` list in copier.yml removes template-only files and folders before rendering output:
 
-- **Language-based**: If language == `java`, all `**/main/kotlin` folders are excluded
-- **Feature-based**: If has_service == `false`, `src/forge/bootstrap` and `src/neoforge/bootstrap` are excluded
-- **Always excluded**: `copier.yml`, `README.md`, `.idea`, `.git`, `docs`, `plans`, `AI_CONTEXT.md`
+- **Always excluded**: `AGENTS.md`, `copier.yml`, `copier.yaml`, `scripts/*`, `docs`, `README.md`, `.idea`, `.git`, `.DS_Store`, `~*`
+
+The generated `.copier/tasks/post_gen.py` then performs dynamic cleanup:
+
+- **Language-based**: If `language == java`, remove generated `src/**/main/kotlin` mod sources. If `language == kotlin`, remove generated Java mod sources according to `has_service`.
+- **Bootstrap language**: Bootstrap targets are Java-only; `src/*/bootstrap/**/main/kotlin` is always removed.
+- **Feature-based**: If `has_service == false`, remove `src/forge/bootstrap`, `src/neoforge/bootstrap`, and `src/minecraft`.
+- **Service split**: If `has_service == true`, move versioned `IdentifierFactory` and `MinecraftAdapter` implementations from `src/common/{version}` to `src/minecraft/{version}` and remove minecraft-side `LoaderAdapter` files for Forge/NeoForge.
 
 ### Important Template Variables in Generated Code
 
@@ -119,18 +125,19 @@ After running `copier copy`, the generated project follows this structure:
 │   │   ├── 20.1/main/                     # MC 1.20.1 specific
 │   │   ├── 21.1/main/                     # MC 1.21 specific
 │   │   ├── 26.1/main/                     # MC 1.26 specific
-│   │   ├── common/main/                   # Version-agnostic shared code
-│   │   └── minecraft/                     # Minecraft-only shared overlays
+│   │   └── common/main/                   # Version-agnostic shared code
 │   ├── fabric/common/main/                # Fabric-specific common code
 │   ├── forge/
 │   │   ├── minecraft/main/                # Forge minecraft-side code
 │   │   └── bootstrap/main/                # Forge bootstrap-side code (if has_service=true)
 │   ├── neoforge/
-│   │   ├── minecraft/main/                # NeoForge minecraft-side code
-│   │   └── bootstrap/main/                # NeoForge bootstrap-side code (if has_service=true)
-│   └── minecraft/                         # Cross-loader minecraft layer
-│       ├── 20.1/main/
+│   │   ├── minecraft/common/main/         # NeoForge common minecraft-side code
+│   │   ├── minecraft/21.1/main/           # NeoForge MC 1.21-specific code
+│   │   ├── minecraft/26.1/main/           # NeoForge MC 1.26-specific code
+│   │   └── bootstrap/common|21.1|26.1/    # NeoForge bootstrap code (if has_service=true)
+│   └── minecraft/                         # Cross-loader minecraft layer (if has_service=true)
 │       ├── 21.1/main/
+│       ├── 26.1/main/
 │       └── main/
 ├── build.gradle.kts                       # Main build file (rendered from template)
 ├── settings.gradle.kts                    # Settings and project layout (rendered from template)
@@ -148,7 +155,7 @@ Each source folder contains:
 
 ### Gradle Plugins Used
 
-- **Cloche** (v0.18.11-dust.2): Multi-loader Minecraft modding framework
+- **Cloche** (v0.18.11-dust.18): Multi-loader Minecraft modding framework
 - **Shadow** (v9.4.1): JAR shadowing and bundling
 - **Git-Version** (v5.0.0): Automated versioning from git history
 - **Kotlin** (v2.3.20): Kotlin language support (if language == kotlin)
@@ -160,9 +167,6 @@ In any generated project, use these Gradle commands:
 ```bash
 # Build the mod JAR
 ./gradlew build
-
-# Build a specific loader (fabric, forge, neoforge, etc.)
-./gradlew :fabric:build
 
 # Run Minecraft in development environment
 ./gradlew runClient
@@ -207,19 +211,22 @@ source=https://github.com/...   # Source URL (if GitHub)
 
 When modifying the template itself:
 
-1. **Update AI_CONTEXT.md**: Document changes to structure, variables, or build logic
-2. **Modify .jinja files**: Only change rendered templates, not rendered output
-3. **Update copier.yml**: If adding new questions, variables, or conditions
-4. **Test generation**: Run `copier copy` locally to verify output is correct
-5. **Validate Gradle**: Ensure generated `build.gradle.kts` is syntactically valid
+1. **Modify templates and buildSrc sources intentionally**: `.jinja` files are rendered by Copier; static buildSrc `.kt`/`.gradle.kts` files are copied directly.
+2. **Update copier.yml**: If adding new questions, variables, excludes, or tasks.
+3. **Update `.copier/tasks/post_gen.py.jinja`**: If feature/language cleanup or source migration rules change.
+4. **Run targeted scripts**: Use scripts under `scripts/` for structural smoke checks where relevant.
+5. **Test generation**: Run `copier copy` locally to verify output is correct.
+6. **Validate Gradle**: Ensure generated `build.gradle.kts` and buildSrc compile.
 
 ### Common Template Modifications
 
 #### Adding a New Minecraft Version
 
-1. Create new versioned directories: `src/common/X.X/main/` and `src/minecraft/X.X/main/`
-2. Update README or copier.yml if version list is documented
-3. Ensure gradle configuration auto-discovers new versions
+1. Create new versioned directories under `src/common/X.X/main/`, `src/minecraft/X.X/main/`, and loader-specific folders as needed.
+2. Update `build.gradle.kts.jinja` target/container/run configuration.
+3. Update buildSrc version helpers such as `MinecraftVersions.kt`, `VersionMappings.kt`, and multiversion dependency rules when needed.
+4. Update `.copier/tasks/post_gen.py.jinja` migration/removal maps if versioned files move during generation.
+5. Update docs if the supported version list changes.
 
 #### Adding a New Loader
 
@@ -232,7 +239,7 @@ When modifying the template itself:
 
 1. Add to `copier.yml` with type, help text, defaults, and validator
 2. Use `{{ variable_name }}` in `.jinja` files
-3. Document the variable in this file and AI_CONTEXT.md
+3. Document the variable in this file if it affects generated structure or workflow
 
 ## Testing Instructions
 
@@ -281,6 +288,11 @@ copier copy . /tmp/test_java_min \
 # Verify both generated projects build
 cd /tmp/test_kotlin_full && ./gradlew build
 cd /tmp/test_java_min && ./gradlew build
+
+# Run template structural checks from the template repository
+pwsh ./scripts/test-buildsrc-presets.ps1
+pwsh ./scripts/test-final-jar-buildsrc.ps1
+pwsh ./scripts/test-multiversion-dependencies.ps1
 ```
 
 ## Code Style and Conventions
@@ -309,7 +321,8 @@ cd /tmp/test_java_min && ./gradlew build
 - **Shared code**: `src/common/` (loader-independent, all versions)
 - **Version-specific shared**: `src/common/{version}/` (MC-version-specific, all loaders)
 - **Loader-specific**: `src/{loader}/` (all versions, loader-specific)
-- **Minecraft/Bootstrap split**: Use `minecraft/` for runtime-side code, `bootstrap/` for pre-launch loader-side code (if has_service=true)
+- **Minecraft/Bootstrap split**: Use `minecraft/` for runtime-side code, `bootstrap/` for pre-launch loader-side code (if has_service=true). Bootstrap code is Java-only.
+- **Generated cleanup matters**: Inspect `.copier/tasks/post_gen.py.jinja` before changing source layout; it moves/removes files after Copier renders templates.
 
 ## Important Concepts for Agents
 
@@ -333,22 +346,27 @@ Cloche is a custom multi-loader modding framework that:
 - Each loader produces platform-specific JARs
 - Git-version plugin auto-increments versions from git tags
 
-### Gradle Version Catalog
+### BuildSrc Conventions and Dependency Helpers
 
-The template uses Gradle's version catalog feature for centralized dependency management. Check the generated `gradle/libs.versions.toml` or equivalent for:
-- Plugin versions
-- Dependency versions
-- Platform-specific versions per Minecraft release
+The template centralizes build logic in buildSrc:
+
+- `clocheTemplate.base.gradle.kts` configures shared plugins and project defaults.
+- `clocheTemplate.language.kotlin.gradle.kts` and `clocheTemplate.language.java.gradle.kts` configure language-specific behavior.
+- `MultiversionDependencies*`, `MinecraftVersions`, and `VersionMappings` support loader/version-specific dependency resolution.
+- `gradle/multiversion-dependencies.gradle.kts.jinja` declares generated-project dependency variants such as MixinExtras and KotlinLangForge.
 
 ## Quick Navigation
 
 Read files in this order for fastest orientation:
 
-1. **AI_CONTEXT.md** — High-level repository contracts and what changes require documentation
-2. **copier.yml** — Template questions, defaults, validators, and conditional logic
-3. **README.md** — User-facing template documentation
-4. **build.gradle.kts.jinja** — Build configuration and loader setup
-5. **settings.gradle.kts.jinja** — Project structure and plugin repositories
+1. **AGENTS.md** — Repository overview and workflow notes
+2. **copier.yml** — Template questions, defaults, validators, excludes, and tasks
+3. **.copier/tasks/post_gen.py.jinja** — Post-generation cleanup and source migration
+4. **buildSrc/build.gradle.kts** — Build logic dependencies and toolchain
+5. **buildSrc/src/main/kotlin/** — Convention plugins and helper DSLs
+6. **build.gradle.kts.jinja** — Generated build configuration and loader setup
+7. **gradle/multiversion-dependencies.gradle.kts.jinja** — Generated multiversion dependency declarations
+8. **settings.gradle.kts.jinja** — Project settings and plugin repositories
 
 ## Contact & Documentation
 
