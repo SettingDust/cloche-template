@@ -1,5 +1,5 @@
-import settingdust.cloche_template.buildsrc.*
 import groovy.lang.Closure
+import settingdust.cloche_template.buildsrc.*
 
 plugins {
     java
@@ -11,8 +11,6 @@ plugins {
 
 val archive_name: String by rootProject.properties
 val gitVersion: Closure<String> by extra
-
-group = "settingdust.cloche_template_developing"
 version = gitVersion()
 
 createClocheTemplatePresetConventions()
