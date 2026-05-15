@@ -1,3 +1,4 @@
+import earth.terrarium.cloche.api.attributes.TargetAttributes
 import groovy.lang.Closure
 import settingdust.cloche_template.buildsrc.*
 
