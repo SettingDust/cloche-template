@@ -6,6 +6,7 @@ from pathlib import Path
 
 HAS_SERVICE = {{ "True" if has_service else "False" }}
 LANGUAGE = "{{ language }}"
+PACKAGE_PATH = Path(*"{{ group }}".split("."))
 
 
 def copy_if_exists(src: Path, dst: Path) -> None:
@@ -55,8 +56,8 @@ def migrate_identifier_and_minecraft_adapters(root: Path) -> None:
 
         for lang, ext in (("java", "java"), ("kotlin", "kt")):
             for name in ("IdentifierFactory", "MinecraftAdapter"):
-                src = common_main / lang / "{{ group.replace('.', _copier_conf.sep) }}{{ _copier_conf.sep }}" / vdir / "util" / f"{name}.{ext}.jinja"
-                dst = minecraft_main / lang / "{{ group.replace('.', _copier_conf.sep) }}{{ _copier_conf.sep }}" / vdir / "util" / f"{name}.{ext}.jinja"
+                src = common_main / lang / PACKAGE_PATH / vdir / "util" / f"{name}.{ext}.jinja"
+                dst = minecraft_main / lang / PACKAGE_PATH / vdir / "util" / f"{name}.{ext}.jinja"
                 copy_if_exists(src, dst)
                 remove_if_exists(src)
 
