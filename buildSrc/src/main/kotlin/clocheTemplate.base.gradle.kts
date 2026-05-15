@@ -83,3 +83,20 @@ repositories {
 
     mavenLocal()
 }
+
+dependencies {
+    attributesSchema {
+        attribute(TargetAttributes.MINECRAFT_VERSION) {
+            compatibilityRules.add(MinecraftVersionCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.MOD_LOADER) {
+            compatibilityRules.add(MinecraftModLoaderCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.CLOCHE_MINECRAFT_VERSION) {
+            compatibilityRules.add(MinecraftVersionCompatibilityRule::class)
+        }
+        attribute(TargetAttributes.CLOCHE_MOD_LOADER) {
+            compatibilityRules.add(MinecraftModLoaderCompatibilityRule::class)
+        }
+    }
+}
