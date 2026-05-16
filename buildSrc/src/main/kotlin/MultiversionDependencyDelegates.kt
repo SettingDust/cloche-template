@@ -62,7 +62,7 @@ val MultiversionDependencies.mixinextras: MultiversionDependencySpec by maven(
 val MultiversionDependencies.preloadingTricks: MultiversionDependencySpec by maven(
     group = "settingdust.preloading_tricks",
     artifact = "PreloadingTricks",
-    version = "3.5.12",
+    version = "3.6.0",
 )
 
 val MultiversionDependencies.fabricLanguageKotlin: MultiversionDependencySpec by maven(
@@ -74,18 +74,18 @@ val MultiversionDependencies.fabricLanguageKotlin: MultiversionDependencySpec by
 val MultiversionDependencies.klf: MultiversionDependencySpec by maven(
     group = "dev.nyon",
     artifact = "KotlinLangForge",
-    version = "2.11.2-k2.3.21",
+    version = "2.12.0-k2.3.21",
 ) {
     resolve(version = { loader, mcVersion ->
         when (loader to mcVersion) {
             MinecraftModLoader.forge to MinecraftVersion.`20_1` ->
-                "2.11.2-k2.3.21-2.0+forge"
+                "$version-2.0+forge"
 
             MinecraftModLoader.neoforge to MinecraftVersion.`21_1` ->
-                "2.11.2-k2.3.21-3.0+neoforge"
+                "$version-3.0+neoforge"
 
             MinecraftModLoader.neoforge to MinecraftVersion.`26_1` ->
-                "2.11.2-k2.3.21-3.1+neoforge"
+                "$version-3.1+neoforge"
 
             else -> error("No KLF variant for $loader / $mcVersion; choose a dependency manually")
         }
