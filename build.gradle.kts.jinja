@@ -111,7 +111,11 @@ cloche {
     // region Main Targets - Fabric
 
     val fabricCommon = common("fabric:common") {
+        {%- if has_service %}
+        dependsOn(commonMain, minecraft)
+        {%- else %}
         dependsOn(commonMain)
+        {%- endif %}
         // mixins.from(file("src/fabric/common/main/resources/$id.fabric.mixins.json"))
     }
 
@@ -265,7 +269,11 @@ cloche {
     {%- endif %}
 
     val neoforgeMinecraftCommon = common("neoforge:minecraft:common") {
+        {%- if has_service %}
         dependsOn(minecraft)
+        {%- else %}
+        dependsOn(commonMain)
+        {%- endif %}
 
         mixins.from(file("src/neoforge/minecraft/common/main/resources/$id.neoforge.mixins.json"))
     }

@@ -2,9 +2,8 @@ package {{group}}.fabric.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import {{group}}.util.LoaderAdapter;
 
-public class LoaderAdapter implements LoaderAdapter {
+public class LoaderAdapter implements {{group}}.util.LoaderAdapter {
     @Override
     public boolean isClient() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;

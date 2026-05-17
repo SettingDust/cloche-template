@@ -1,9 +1,8 @@
 package {{group}}.neoforge.util;
 
 import net.neoforged.fml.loading.LoadingModList;
-import {{group}}.util.LoaderAdapter;
 
-public class LoaderAdapter implements LoaderAdapter {
+public class LoaderAdapter implements {{group}}.util.LoaderAdapter {
     @Override
     public boolean isClient() {
         return NeoForgeAdapter.getInstance().getDist().isClient();

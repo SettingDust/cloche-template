@@ -2,9 +2,8 @@ package {{group}}.forge.util;
 
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.LoadingModList;
-import {{group}}.util.LoaderAdapter;
 
-public class LoaderAdapter implements LoaderAdapter {
+public class LoaderAdapter implements {{group}}.util.LoaderAdapter {
     @Override
     public boolean isClient() {
         return FMLLoader.getDist().isClient();
