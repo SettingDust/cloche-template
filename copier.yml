@@ -80,7 +80,7 @@ _exclude:
   - "SPEC.md"
   - "copier.yaml"
   - "copier.yml"
-  - "scripts/*"
+  - "scripts"
   - "~*"
   - ".git"
   - ".DS_Store"

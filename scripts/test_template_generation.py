@@ -18,6 +18,10 @@ def assert_service_split(root: Path, has_service: bool) -> None:
     if not has_service:
         for relative in ("src/forge/bootstrap", "src/neoforge/bootstrap", "src/minecraft"):
             require(not (root / relative).exists(), f"has_service=false must remove {relative}.")
+        require(
+            (root / "src/neoforge/minecraft/common/main/resources/META-INF/services/settingdust.test_mod.util.LoaderAdapter").is_file(),
+            "has_service=false must keep NeoForge minecraft loader adapter service.",
+        )
         return
     for version in ("20.1", "21.1", "26.1"):
         common_services = root / "src" / "common" / version / "main" / "resources" / "META-INF" / "services"
@@ -26,6 +30,29 @@ def assert_service_split(root: Path, has_service: bool) -> None:
             name = f"settingdust.test_mod.util.{service}"
             require(not (common_services / name).exists(), f"has_service=true must move {name} out of common {version} sources.")
             require((minecraft_services / name).is_file(), f"has_service=true must create minecraft {version} service {name}.")
+    for version in ("21.1", "26.1"):
+        minecraft_adapter = root / "src" / "neoforge" / "minecraft" / version / "main" / "resources" / "META-INF" / "services" / "settingdust.test_mod.neoforge.util.NeoForgeAdapter"
+        bootstrap_adapter = root / "src" / "neoforge" / "bootstrap" / version / "main" / "resources" / "META-INF" / "services" / "settingdust.test_mod.neoforge.util.NeoForgeAdapter"
+        require(not minecraft_adapter.exists(), f"has_service=true must remove minecraft NeoForgeAdapter service from {version}.")
+        require(bootstrap_adapter.is_file(), f"has_service=true must create bootstrap NeoForgeAdapter service for {version}.")
+    require(
+        (root / "src/neoforge/bootstrap/common/main/java/settingdust/test_mod/neoforge/util/NeoForgeAdapter.java").is_file(),
+        "has_service=true must keep bootstrap NeoForgeAdapter interface.",
+    )
+    require(
+        not (root / "src/neoforge/minecraft/common/main/java/settingdust/test_mod/neoforge/util/NeoForgeAdapter.java").exists(),
+        "has_service=true must remove minecraft NeoForgeAdapter interface.",
+    )
+    bootstrap_loader = root / "src/neoforge/bootstrap/common/main/java/settingdust/test_mod/neoforge/util/LoaderAdapter.java"
+    require(bootstrap_loader.is_file(), "has_service=true must keep bootstrap NeoForge LoaderAdapter.")
+    require(
+        "NeoForgeAdapter.getInstance().getDist().isClient()" in bootstrap_loader.read_text(encoding="utf-8"),
+        "has_service=true bootstrap NeoForge LoaderAdapter must implement isClient through NeoForgeAdapter.",
+    )
+    require(
+        not (root / "src/neoforge/minecraft/common/main/java/settingdust/test_mod/neoforge/util/LoaderAdapter.java").exists(),
+        "has_service=true must remove minecraft NeoForge LoaderAdapter.",
+    )
 
 def assert_entrypoints_and_metadata(root: Path, language: str) -> None:
     build = (root / "build.gradle.kts").read_text(encoding="utf-8")

@@ -79,6 +79,16 @@ def remove_loader_adapter_from_minecraft_when_bootstrap(root: Path) -> None:
         remove_files_recursively(base, is_loader_adapter)
 
 
+def remove_neoforge_adapter_from_minecraft_when_bootstrap(root: Path) -> None:
+    # When has_service=true, remove minecraft-side NeoForgeAdapter files (we implement in bootstrap).
+    base = root / "src" / "neoforge" / "minecraft"
+
+    def is_neoforge_adapter(p: Path) -> bool:
+        return "NeoForgeAdapter" in p.name
+
+    remove_files_recursively(base, is_neoforge_adapter)
+
+
 def remove_language_files(root: Path) -> None:
     """
     Remove language-specific directories:
@@ -145,6 +155,7 @@ if __name__ == "__main__":
     if HAS_SERVICE:
         migrate_identifier_and_minecraft_adapters(root)
         remove_loader_adapter_from_minecraft_when_bootstrap(root)
+        remove_neoforge_adapter_from_minecraft_when_bootstrap(root)
     else:
         remove_service_agnostic_folders(root)
     remove_language_files(root)

@@ -1,0 +1,15 @@
+package {{group}}.neoforge.v26_1.util;
+
+import net.neoforged.fml.loading.FMLLoader;
+import {{group}}.util.MinecraftVersion;
+
+public class NeoForgeAdapter implements {{group}}.neoforge.util.NeoForgeAdapter {
+    public NeoForgeAdapter() {
+        MinecraftVersion.V261.requireCurrent();
+    }
+
+    @Override
+    public net.neoforged.api.distmarker.Dist getDist() {
+        return FMLLoader.getCurrent().getDist();
+    }
+}

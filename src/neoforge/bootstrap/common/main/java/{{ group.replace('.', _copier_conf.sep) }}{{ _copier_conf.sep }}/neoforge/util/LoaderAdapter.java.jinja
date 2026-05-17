@@ -1,12 +1,11 @@
 package {{group}}.neoforge.util;
 
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.LoadingModList;
 
 public class LoaderAdapter implements {{group}}.util.LoaderAdapter {
     @Override
     public boolean isClient() {
-        return isClientDist();
+        return NeoForgeAdapter.getInstance().getDist().isClient();
     }
 
     @Override
@@ -17,20 +16,5 @@ public class LoaderAdapter implements {{group}}.util.LoaderAdapter {
     @Override
     public boolean isModLoaded(String modId) {
         return LoadingModList.get().getModFileById(modId) != null;
-    }
-
-    private static boolean isClientDist() {
-        try {
-            Object dist = FMLLoader.class.getMethod("getDist").invoke(null);
-            return "CLIENT".equals(String.valueOf(dist));
-        } catch (ReflectiveOperationException ignored) {
-            try {
-                Object loader = FMLLoader.class.getMethod("getCurrent").invoke(null);
-                Object dist = loader.getClass().getMethod("dist").invoke(loader);
-                return "CLIENT".equals(String.valueOf(dist));
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException("Cannot determine NeoForge distribution", e);
-            }
-        }
     }
 }

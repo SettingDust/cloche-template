@@ -61,6 +61,8 @@ V30: test helpers ! deduplicate Copier invocation/temp cleanup/read/assert utili
 V31: generated build contract ! avoid hidden interactive interruption; subprocess ! inherit Ctrl-C prompt from shell.
 V32: template CI/workflows ! call Python contract scripts, not deleted PowerShell scripts.
 V33: generated project workflows (`*.yml.jinja`) ! stay generated-project only; template repo tests live in non-template workflow.
+V34: `has_service=false` → generated NeoForge loader adapter lives in `src/neoforge/minecraft/**`; no `src/neoforge/bootstrap/**`; no `src/minecraft/**` service split.
+V35: `has_service=true` → `NeoForgeAdapter` interface + version impl/services live in `src/neoforge/bootstrap/**`; minecraft-side `LoaderAdapter` ⊥ use NeoForge-only dist API for `isClient`.
 §T
 id|status|task|cites
 T1|x|Fix/confirm missing `gradle/multiversion-dependencies.gradle.kts.jinja` smoke expectation|V20,I.cmd
@@ -79,6 +81,7 @@ T13|x|Add generated-output exclusion assertions for template-only artifacts|V28,
 T14|x|Extract shared Python test helper for Copier/temp/subprocess assertions|V29,V30,V31,I.cmd
 T15|x|Update CI/docs/agent instructions to reference Python contract scripts only|V22,V32,V33,I.cmd
 T16|x|Improve generated build test ergonomics: explicit cases, flushed progress, optional slow gate|V25,V29,V31,I.cmd
+T17|x|Move `NeoForgeAdapter` to NeoForge bootstrap path and keep no-bootstrap direct minecraft path|V34,V35,I.task
 §B
 id|date|cause|fix
 B1|2026-05-17|no-service generated build referenced undeclared `minecraft` target|V21
