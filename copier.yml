@@ -71,6 +71,7 @@ _jinja_extensions:
 _tasks:
   - "python .copier/tasks/post_gen.py"
   - "python -c \"import shutil; shutil.rmtree('.copier', ignore_errors=True)\""
+  - "python -c \"from pathlib import Path; import stat; p = Path('gradlew'); p.chmod(p.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)\""
   - "git init"
   - "git add ."
   - "git update-index --chmod=+x ./gradlew"

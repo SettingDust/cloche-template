@@ -1,4 +1,6 @@
 from __future__ import annotations
+import os
+import stat
 from pathlib import Path
 from testlib import generated_project, require
 
@@ -82,6 +84,13 @@ def assert_template_artifacts_excluded(root: Path) -> None:
     for relative in ("AGENTS.md", "SPEC.md", "scripts", "docs", "copier.yml", "copier.yaml"):
         require(not (root / relative).exists(), f"Generated project must not include template-only artifact {relative}.")
 
+def assert_gradlew_executable(root: Path) -> None:
+    if os.name == "nt":
+        return
+    gradlew = root / "gradlew"
+    mode = gradlew.stat().st_mode
+    require(mode & stat.S_IXUSR, "Generated gradlew must be executable by owner.")
+
 def main() -> None:
     for language in ("java", "kotlin"):
         for has_service in (False, True):
@@ -91,5 +100,6 @@ def main() -> None:
                 assert_entrypoints_and_metadata(root, language)
                 assert_no_service_false_minecraft_reference(root, has_service)
                 assert_template_artifacts_excluded(root)
+                assert_gradlew_executable(root)
 if __name__ == "__main__":
     main()

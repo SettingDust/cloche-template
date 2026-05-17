@@ -63,6 +63,7 @@ V32: template CI/workflows ! call Python contract scripts, not deleted PowerShel
 V33: generated project workflows (`*.yml.jinja`) ! stay generated-project only; template repo tests live in non-template workflow.
 V34: `has_service=false` → generated NeoForge loader adapter lives in `src/neoforge/minecraft/**`; no `src/neoforge/bootstrap/**`; no `src/minecraft/**` service split.
 V35: `has_service=true` → `NeoForgeAdapter` interface + version impl/services live in `src/neoforge/bootstrap/**`; minecraft-side `LoaderAdapter` ⊥ use NeoForge-only dist API for `isClient`.
+V36: generated `gradlew` ! executable on POSIX filesystems before Gradle build smoke.
 §T
 id|status|task|cites
 T1|x|Fix/confirm missing `gradle/multiversion-dependencies.gradle.kts.jinja` smoke expectation|V20,I.cmd
@@ -85,3 +86,4 @@ T17|x|Move `NeoForgeAdapter` to NeoForge bootstrap path and keep no-bootstrap di
 §B
 id|date|cause|fix
 B1|2026-05-17|no-service generated build referenced undeclared `minecraft` target|V21
+B2|2026-05-18|Copier task marked git index only; working-tree `gradlew` stayed non-executable|V36
