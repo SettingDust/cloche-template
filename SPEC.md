@@ -19,12 +19,9 @@ cmd: `copier update` → update generated project.
 task: `.copier/tasks/post_gen.py` → migrate/remove language/service-specific files.
 cmd: `./gradlew build` in generated project → final jars + sources jar.
 cmd: `./gradlew runClient` / `./gradlew runServer` in generated project → dev runs.
-cmd: `pwsh ./scripts/test-buildsrc-presets.ps1` → preset smoke check.
-cmd: `pwsh ./scripts/test-final-jar-buildsrc.ps1` → final-jar smoke check.
-cmd: `pwsh ./scripts/test-multiversion-dependencies.ps1` → multiversion dependency smoke check.
-cmd: `python scripts/test_buildsrc_presets.py` → preset smoke check.
-cmd: `python scripts/test_final_jar_buildsrc.py` → final-jar smoke check.
-cmd: `python scripts/test_multiversion_dependencies.py` → multiversion dependency smoke check.
+cmd: `python scripts/test_template_contract.py` → static template contract check.
+cmd: `python scripts/test_packaging_contract.py` → packaging/static variant contract check.
+cmd: `python scripts/test_multiversion_contract.py` → multiversion dependency contract check.
 cmd: `python scripts/test_template_generation.py` → Copier generation matrix check.
 cmd: `python scripts/test_generated_builds.py` → generated-project Gradle build check.
 api: `clocheTemplatePresetConventions { fabric|forge|neoforge { ... }` → language/plugin target conventions.
@@ -58,6 +55,12 @@ V24: Copier render contract ! run matrix `language ∈ {java,kotlin}` × `has_se
 V25: generated build contract ! slow; compile only representative combos `java+has_service=false`, `kotlin+has_service=true`.
 V26: packaging contract ! assert final jar/container/runtime variant wiring statically, separate from render/build matrix.
 V27: multiversion dependency contract ! assert helper files, resolver fail-fast, loader/version mappings, MC version refs aligned.
+V28: generated project ⊥ contain template repo artifacts: `SPEC.md`, `scripts/`, `AGENTS.md`, `docs/`.
+V29: Copier subprocess tests ! surface stdout/stderr on failure; skipped only when `copier` absent.
+V30: test helpers ! deduplicate Copier invocation/temp cleanup/read/assert utilities.
+V31: generated build contract ! avoid hidden interactive interruption; subprocess ! inherit Ctrl-C prompt from shell.
+V32: template CI/workflows ! call Python contract scripts, not deleted PowerShell scripts.
+V33: generated project workflows (`*.yml.jinja`) ! stay generated-project only; template repo tests live in non-template workflow.
 §T
 id|status|task|cites
 T1|x|Fix/confirm missing `gradle/multiversion-dependencies.gradle.kts.jinja` smoke expectation|V20,I.cmd
@@ -72,6 +75,10 @@ T9|x|Create generated build contract test for representative slow combos|V7,V8,V
 T10|x|Create packaging contract test for final jar/container/runtime variant wiring|V12,V13,V16,V26,I.cmd
 T11|x|Create multiversion dependency contract test for resolver/mapping/MC refs|V14,V15,V18,V27,I.cmd
 T12|x|Delete old PowerShell test scripts after Python contracts pass|V22,I.cmd
+T13|x|Add generated-output exclusion assertions for template-only artifacts|V28,V24,I.cmd
+T14|x|Extract shared Python test helper for Copier/temp/subprocess assertions|V29,V30,V31,I.cmd
+T15|x|Update CI/docs/agent instructions to reference Python contract scripts only|V22,V32,V33,I.cmd
+T16|x|Improve generated build test ergonomics: explicit cases, flushed progress, optional slow gate|V25,V29,V31,I.cmd
 §B
 id|date|cause|fix
 B1|2026-05-17|no-service generated build referenced undeclared `minecraft` target|V21

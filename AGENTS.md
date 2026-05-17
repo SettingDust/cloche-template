@@ -289,10 +289,14 @@ copier copy . /tmp/test_java_min \
 cd /tmp/test_kotlin_full && ./gradlew build
 cd /tmp/test_java_min && ./gradlew build
 
-# Run template structural checks from the template repository
-pwsh ./scripts/test-buildsrc-presets.ps1
-pwsh ./scripts/test-final-jar-buildsrc.ps1
-pwsh ./scripts/test-multiversion-dependencies.ps1
+# Run template contract checks from the template repository
+python ./scripts/test_template_contract.py
+python ./scripts/test_packaging_contract.py
+python ./scripts/test_multiversion_contract.py
+python ./scripts/test_template_generation.py
+
+# Optional slow generated-project builds
+$env:CLOCHE_RUN_SLOW_TESTS=1; python ./scripts/test_generated_builds.py
 ```
 
 ## Code Style and Conventions
@@ -353,7 +357,7 @@ The template centralizes build logic in buildSrc:
 - `clocheTemplate.base.gradle.kts` configures shared plugins and project defaults.
 - `clocheTemplate.language.kotlin.gradle.kts` and `clocheTemplate.language.java.gradle.kts` configure language-specific behavior.
 - `MultiversionDependencies*`, `MinecraftVersions`, and `VersionMappings` support loader/version-specific dependency resolution.
-- `gradle/multiversion-dependencies.gradle.kts.jinja` declares generated-project dependency variants such as MixinExtras and KotlinLangForge.
+- `MultiversionDependencies*`, `MinecraftVersions`, and `VersionMappings` declare generated-project dependency variants such as MixinExtras and KotlinLangForge.
 
 ## Quick Navigation
 
@@ -365,8 +369,9 @@ Read files in this order for fastest orientation:
 4. **buildSrc/build.gradle.kts** — Build logic dependencies and toolchain
 5. **buildSrc/src/main/kotlin/** — Convention plugins and helper DSLs
 6. **build.gradle.kts.jinja** — Generated build configuration and loader setup
-7. **gradle/multiversion-dependencies.gradle.kts.jinja** — Generated multiversion dependency declarations
-8. **settings.gradle.kts.jinja** — Project settings and plugin repositories
+7. **buildSrc/src/main/kotlin/MultiversionDependencies.kt** — Multiversion dependency extension
+8. **buildSrc/src/main/kotlin/MultiversionDependencyDelegates.kt** — Generated-project dependency presets
+9. **settings.gradle.kts.jinja** — Project settings and plugin repositories
 
 ## Contact & Documentation
 

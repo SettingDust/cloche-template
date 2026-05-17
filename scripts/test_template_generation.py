@@ -1,46 +1,7 @@
 from __future__ import annotations
-import shutil
-import subprocess
-import sys
-import tempfile
 from pathlib import Path
-ROOT = Path(__file__).resolve().parents[1]
+from testlib import generated_project, require
 
-def require(condition: bool, message: str) -> None:
-    if not condition:
-        raise AssertionError(message)
-
-def has_command(command: str) -> bool:
-    return shutil.which(command) is not None
-
-def run_copier(destination: Path, language: str, has_service: bool) -> None:
-    if not has_command("copier"):
-        print("SKIP: copier is not available", file=sys.stderr)
-        raise SystemExit(0)
-    command = [
-        "copier",
-        "copy",
-        str(ROOT),
-        str(destination),
-        "--trust",
-        "--vcs-ref=HEAD",
-        "--defaults",
-        "--data",
-        "name=TestMod",
-        "--data",
-        f"language={language}",
-        "--data",
-        f"has_service={'true' if has_service else 'false'}",
-    ]
-    subprocess.run(command, check=True)
-
-def generated(language: str, has_service: bool):
-    temp_dir = Path(tempfile.mkdtemp(prefix=f"cloche-template-{language}-{has_service}-"))
-    try:
-        run_copier(temp_dir, language, has_service)
-        yield temp_dir
-    finally:
-        shutil.rmtree(temp_dir, ignore_errors=True)
 
 def dirs_named(root: Path, name: str) -> list[Path]:
     return [path for path in (root / "src").rglob(name) if path.is_dir()]
@@ -90,13 +51,18 @@ def assert_no_service_false_minecraft_reference(root: Path, has_service: bool) -
     require("dependsOn(commonMain, minecraft)" not in build, "has_service=false generated build must not reference minecraft in fabric common.")
     require("dependsOn(minecraft)" not in build, "has_service=false generated build must not reference minecraft target.")
 
+def assert_template_artifacts_excluded(root: Path) -> None:
+    for relative in ("AGENTS.md", "SPEC.md", "scripts", "docs", "copier.yml", "copier.yaml"):
+        require(not (root / relative).exists(), f"Generated project must not include template-only artifact {relative}.")
+
 def main() -> None:
     for language in ("java", "kotlin"):
         for has_service in (False, True):
-            for root in generated(language, has_service):
+            with generated_project(language, has_service) as root:
                 assert_language_cleanup(root, language, has_service)
                 assert_service_split(root, has_service)
                 assert_entrypoints_and_metadata(root, language)
                 assert_no_service_false_minecraft_reference(root, has_service)
+                assert_template_artifacts_excluded(root)
 if __name__ == "__main__":
     main()

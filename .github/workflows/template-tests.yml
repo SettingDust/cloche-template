@@ -1,0 +1,46 @@
+on:
+  push:
+  pull_request:
+jobs:
+  template-contracts:
+    name: Template Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install Copier
+        run: python -m pip install copier jinja2-strcase
+      - name: Run static contracts
+        run: |
+          python scripts/test_template_contract.py
+          python scripts/test_packaging_contract.py
+          python scripts/test_multiversion_contract.py
+      - name: Run Copier generation matrix
+        run: python scripts/test_template_generation.py
+  generated-builds:
+    name: Generated Project Builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install Copier
+        run: python -m pip install copier jinja2-strcase
+      - name: Run generated project builds
+        env:
+          CLOCHE_RUN_SLOW_TESTS: '1'
+        run: python scripts/test_generated_builds.py
