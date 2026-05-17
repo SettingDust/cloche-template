@@ -87,3 +87,4 @@ _exclude:
   - "docs"
   - "README.md"
   - ".idea"
+  - ".github\\workflows\\template-tests.yml"
